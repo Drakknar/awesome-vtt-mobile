@@ -1,0 +1,70 @@
+{
+  "id": "awesome-vtt-mobile",
+  "title": "Awesome VTT – Phone Companion",
+  "description": "A phone view for players at the table: character, chat, journals, compendium, targets and turn alerts, without the map.",
+  "version": "0.9.0",
+  "authors": [
+    {
+      "name": "Stefano Pignataro"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "6.0.0",
+          "verified": "6.0.5"
+        }
+      },
+      {
+        "id": "demonlord",
+        "type": "system",
+        "compatibility": {
+          "minimum": "6.1.0",
+          "verified": "6.1.11"
+        }
+      }
+    ],
+    "recommends": [
+      {
+        "id": "awesome-vtt",
+        "type": "module",
+        "reason": "Physical dice entry from the phone."
+      },
+      {
+        "id": "awesome-vtt-shared-inventory",
+        "type": "module",
+        "reason": "A Party section with the party's shared coins and items."
+      }
+    ],
+    "requires": [
+      {
+        "id": "awesome-vtt-core",
+        "type": "module",
+        "reason": "Shared code (dnd5e data, rolls and checks, sheet, quick actions, prompts, dice pool, compendium and journal panels, chat helpers).",
+        "compatibility": {
+          "minimum": "0.12.0"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/mobile.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

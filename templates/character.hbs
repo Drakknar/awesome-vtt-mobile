@@ -1,0 +1,126 @@
+{{#if picking}}
+<section class="avttm-card">
+  <h2>{{localize "AVTTM.Character.Pick"}}</h2>
+  <ul class="avttm-list">
+    {{#each pick}}
+    <li><button type="button" data-action="pickActor" data-actor-id="{{id}}"><img src="{{img}}" alt=""><span>{{name}}</span></button></li>
+    {{else}}
+    <li class="avttm-muted">{{localize "AVTTM.Character.None"}}</li>
+    {{/each}}
+  </ul>
+</section>
+{{else}}
+
+<div class="avttm-sheet-body">
+  {{#if (eq tab "actions")}}{{> "modules/awesome-vtt-mobile/templates/actions.hbs"}}{{/if}}
+
+  {{#if (eq tab "spells")}}
+    {{!-- Every spell by level: cast it (when it can be cast now), prepare or unprepare it, read its description. --}}
+    {{#each spells}}
+    <section class="avttm-group">
+      <h4>{{label}}
+        {{#if slots}}
+        <span class="avttm-slots avttm-adjust">
+          {{localize "AVTTM.Sheet.Slots"}}
+          <button type="button" data-action="slotAdjust" data-slot="{{slots.key}}" data-delta="-1" aria-label="{{localize 'AVTTM.Sheet.SlotLess'}}">−</button>
+          <span>{{slots.value}}/{{slots.max}}</span>
+          <button type="button" data-action="slotAdjust" data-slot="{{slots.key}}" data-delta="1" aria-label="{{localize 'AVTTM.Sheet.SlotMore'}}">+</button>
+        </span>
+        {{/if}}
+      </h4>
+      <ul class="avttm-item-list">
+        {{#each items}}
+        <li class="avttm-item-row avttm-spell-row {{#unless usable}}avttm-spell-unavailable{{/unless}}">
+          {{#if canPrepare}}
+          <button type="button" data-action="spellPrepare" data-item-id="{{id}}" class="avttm-spell-prepare {{#if prepared}}active{{/if}}"
+                  aria-label="{{#if prepared}}{{localize 'AVTTM.Spells.Unprepare' name=name}}{{else}}{{localize 'AVTTM.Spells.Prepare' name=name}}{{/if}}"
+                  aria-pressed="{{#if prepared}}true{{else}}false{{/if}}">
+            <i class="fa-solid {{#if prepared}}fa-book-open{{else}}fa-book{{/if}}" inert></i>
+          </button>
+          {{else if always}}
+          <span class="avttm-spell-always" aria-label="{{localize 'AVTTM.Spells.Always'}}"><i class="fa-solid fa-thumbtack" inert></i></span>
+          {{/if}}
+          {{!-- Name, with small component marks (concentration, ritual) right under it, beside the icon. --}}
+          {{#if usable}}
+          <button type="button" data-action="useItem" data-item-id="{{id}}"><img src="{{img}}" alt="">
+            <span class="avttm-spell-text"><span class="avttm-spell-title">{{name}}</span>{{> avttmSpellTags}}</span>
+          </button>
+          {{else}}
+          <span class="avttm-spell-name"><img src="{{img}}" alt="">
+            <span class="avttm-spell-text"><span class="avttm-spell-title">{{name}}</span>{{> avttmSpellTags}}</span>
+          </span>
+          {{/if}}
+          {{#if usesMax}}
+          <span class="avttm-adjust">
+            <button type="button" data-action="usesAdjust" data-item-id="{{id}}" data-delta="-1" aria-label="{{localize 'AVTTM.Sheet.UseLess'}}">−</button>
+            <span>{{usesValue}}/{{usesMax}}</span>
+            <button type="button" data-action="usesAdjust" data-item-id="{{id}}" data-delta="1" aria-label="{{localize 'AVTTM.Sheet.UseMore'}}">+</button>
+          </span>
+          {{/if}}
+          {{#if @root.canFavorite}}
+          <button type="button" data-action="toggleFavorite" data-item-id="{{id}}" class="avttm-favorite {{#if favorite}}active{{/if}}"
+                  aria-label="{{#if favorite}}{{localize 'AVTTM.Sheet.Unfavorite' name=name}}{{else}}{{localize 'AVTTM.Sheet.Favorite' name=name}}{{/if}}"
+                  aria-pressed="{{#if favorite}}true{{else}}false{{/if}}">
+            <i class="{{#if favorite}}fa-solid{{else}}fa-regular{{/if}} fa-star" inert></i>
+          </button>
+          {{/if}}
+          <button type="button" data-action="invDetails" data-item-id="{{id}}"
+                  class="avttm-item-info {{#if (lookup @root.state.inv.details id)}}active{{/if}}"
+                  aria-label="{{localize 'AVTTM.Sheet.About' name=name}}"
+                  aria-expanded="{{#if (lookup @root.state.inv.details id)}}true{{else}}false{{/if}}">
+            <i class="fa-solid fa-circle-info" inert></i>
+          </button>
+          {{#with (lookup @root.state.inv.details id) as |html|}}
+          <div class="avttm-inv-details avttm-item-details">{{{html}}}</div>
+          {{/with}}
+        </li>
+        {{/each}}
+      </ul>
+    </section>
+    {{else}}
+    <p class="avttm-muted">{{localize "AVTTM.Spells.None"}}</p>
+    {{/each}}
+  {{/if}}
+
+  {{#if inventory}}{{> "modules/awesome-vtt-mobile/templates/inventory.hbs" inventory}}{{/if}}
+
+  {{#if abilities}}
+  <div class="avttm-ability-grid">
+    {{#each abilities}}
+    <div class="avttm-ability">
+      <span class="avttm-ability-abbr">{{abbr}}</span>
+      <span class="avttm-ability-score">{{value}}</span>
+      <button type="button" data-action="rollAbility" data-ability="{{key}}">{{#if checkLabel}}{{checkLabel}}{{else}}{{localize "AVTTM.Sheet.Check"}}{{/if}} {{mod}}</button>
+      {{#if save}}<button type="button" data-action="rollSave" data-ability="{{key}}" class="{{#if proficient}}proficient{{/if}}">{{localize "AVTTM.Sheet.Save"}} {{save}}</button>{{/if}}
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if skills}}
+  <ul class="avttm-skill-list">
+    {{#each skills}}
+    <li><button type="button" data-action="rollSkill" data-skill="{{key}}" class="{{#if proficient}}proficient{{/if}}"><span>{{label}}</span><strong>{{total}}</strong><em>({{passive}})</em></button></li>
+    {{/each}}
+  </ul>
+  {{/if}}
+
+  {{#if status}}
+  <section class="avttm-group">
+    <h4>{{localize "AVTTM.Sheet.Conditions"}}</h4>
+    <div class="avttm-condition-grid">
+      {{#each conditions}}
+      <button type="button" data-action="toggleCondition" data-condition="{{id}}" class="{{#if active}}active{{/if}}"><img src="{{img}}" alt=""><span>{{label}}</span></button>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+</div>
+
+{{!-- Section tabs at the bottom, in thumb reach; pinned above the pill while the list scrolls. --}}
+<nav class="avttm-subtabs">
+  {{#each tabs}}
+  <button type="button" data-action="sheetTab" data-tab="{{id}}" class="{{#if active}}active{{/if}}">{{label}}</button>
+  {{/each}}
+</nav>
+{{/if}}

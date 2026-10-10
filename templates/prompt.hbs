@@ -1,0 +1,31 @@
+<div class="avttm-sheet-panel avttm-prompt avttm-prompt-{{kind}}" role="dialog" aria-modal="true" aria-labelledby="avttm-prompt-title">
+  <header>
+    <h3 id="avttm-prompt-title"><i class="{{icon}}" inert></i> {{title}}</h3>
+    <button type="button" data-action="closeOverlay" aria-label="{{localize 'AVTTM.Prompt.Later'}}"><i class="fa-solid fa-xmark" inert></i></button>
+  </header>
+  <div class="avttm-launcher-panel">
+    <p>{{text}}</p>
+    {{#if tally}}
+    <div class="avttm-death-tally" aria-label="{{localize 'AVTTM.Sheet.DeathSaves'}}">
+      <span class="avttm-death-row success">{{localize "AVTTM.DeathSave.Successes"}}
+        {{#each tally.success}}<i class="fa-{{#if this}}solid{{else}}regular{{/if}} fa-circle-check" inert></i>{{/each}}</span>
+      <span class="avttm-death-row failure">{{localize "AVTTM.DeathSave.Failures"}}
+        {{#each tally.failure}}<i class="fa-{{#if this}}solid{{else}}regular{{/if}} fa-circle-xmark" inert></i>{{/each}}</span>
+    </div>
+    {{/if}}
+    {{#if modes}}
+    <div class="avttm-segmented avttm-adv" role="radiogroup" aria-label="{{localize 'AVTTM.Dice.NextRoll'}}">
+      {{#each modes}}
+      <button type="button" data-action="advMode" data-mode="{{id}}" role="radio" class="{{#if active}}selected{{/if}} avttm-adv-{{tone}}"
+              aria-checked="{{#if active}}true{{else}}false{{/if}}" aria-label="{{label}}">{{text}}</button>
+      {{/each}}
+    </div>
+    {{/if}}
+    <div class="avttm-prompt-choices">
+      {{#each choices}}
+      <button type="button" data-action="promptChoice" data-index="{{@index}}" class="avttm-primary avttm-wide">{{#if icon}}<i class="{{icon}}" inert></i> {{/if}}{{label}}</button>
+      {{/each}}
+    </div>
+    {{#if more}}<p class="avttm-muted avttm-small">{{localize "AVTTM.Prompt.More" count=more}}</p>{{/if}}
+  </div>
+</div>

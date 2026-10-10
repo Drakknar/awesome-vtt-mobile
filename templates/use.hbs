@@ -1,0 +1,139 @@
+<div class="avttm-sheet-panel avttm-use" role="dialog" aria-modal="true" aria-labelledby="avttm-use-title">
+  <header>
+    {{#if canBack}}
+    <button type="button" data-action="useBack" aria-label="{{localize 'AVTTM.Use.Back'}}"><i class="fa-solid fa-chevron-left" inert></i></button>
+    {{/if}}
+    <h3 id="avttm-use-title">{{#if img}}<img src="{{img}}" alt="">{{/if}}<span>{{title}}</span></h3>
+    <button type="button" data-action="closeOverlay" aria-label="{{localize 'AVTTM.Close'}}"><i class="fa-solid fa-xmark" inert></i></button>
+  </header>
+  {{#if stepLabel}}<p class="avttm-muted avttm-small avttm-use-step">{{stepLabel}}</p>{{/if}}
+
+  {{!-- Only this part scrolls; the header and the Next / Use button stay put. --}}
+  <div class="avttm-use-body" data-scroll="use-{{step}}">
+
+  {{#if (eq step "activity")}}
+  <ul class="avttm-list">
+    {{#each activities}}
+    <li><button type="button" data-action="useActivity" data-activity-id="{{id}}">{{#if img}}<img src="{{img}}" alt="">{{/if}}<span>{{name}}</span></button></li>
+    {{/each}}
+  </ul>
+  {{/if}}
+
+  {{#if (eq step "usage")}}
+  {{#if usage.slots.length}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.CastAt"}}</span>
+    <select name="useCast.slot">
+      {{#each usage.slots}}<option value="{{value}}" {{#if selected}}selected{{/if}} {{#if disabled}}disabled{{/if}}>{{label}}</option>{{/each}}
+    </select>
+  </label>
+  {{/if}}
+  {{#if usage.showConsumeSlot}}
+  <label class="avttm-use-check"><span>{{localize "AVTTM.Use.ConsumeSlot"}}</span><input type="checkbox" name="useCast.consumeSlot" {{#if usage.consumeSlot}}checked{{/if}}></label>
+  {{/if}}
+  {{#if usage.concentration}}
+  <label class="avttm-use-check"><span>{{localize "AVTTM.Use.Concentrate"}}</span><input type="checkbox" name="useCast.concentrate" {{#if usage.concentration.concentrate}}checked{{/if}}></label>
+  {{#if usage.concentration.concentrate}}{{#if usage.concentration.endOptions.length}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.EndConcentration"}}</span>
+    <select name="useCast.end">
+      {{#each usage.concentration.endOptions}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+    </select>
+  </label>
+  {{/if}}{{/if}}
+  {{/if}}
+  {{#if usage.scaling}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.Scaling"}}</span>
+    <input type="number" name="useCast.scaling" value="{{usage.scaling.value}}" min="1" {{#if usage.scaling.max}}max="{{usage.scaling.max}}"{{/if}} step="1" inputmode="numeric">
+  </label>
+  {{/if}}
+  {{#each usage.choices}}
+  <label class="avttm-use-field"><span>{{label}}</span>
+    <select name="useCast.choice.{{key}}">
+      {{#each options}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+    </select>
+  </label>
+  {{/each}}
+  {{#if usage.linkedResources}}
+  <label class="avttm-use-check"><span>{{localize "AVTTM.Use.ConsumeLinked" name=usage.linkedResources.name}}</span><input type="checkbox" name="useCast.useLinked" {{#if usage.linkedResources.use}}checked{{/if}}></label>
+  {{/if}}
+  {{#if usage.hasResources}}
+  <label class="avttm-use-check"><span>{{localize "AVTTM.Use.ConsumeResources"}}</span><input type="checkbox" name="useCast.consumeResources" {{#if usage.consumeResources}}checked{{/if}}></label>
+  {{/if}}
+  {{#if usage.templateSkipped}}
+  <p class="avttm-muted avttm-small"><i class="fa-solid fa-circle-info" inert></i> {{localize "AVTTM.Use.AreaSkipped"}}</p>
+  {{/if}}
+  {{#if usage.summonsSkipped}}
+  <p class="avttm-muted avttm-small"><i class="fa-solid fa-circle-info" inert></i> {{localize "AVTTM.Use.SummonsSkipped"}}</p>
+  {{/if}}
+  {{/if}}
+
+  {{#if (eq step "targets")}}
+  {{#if hint}}<p class="avttm-muted">{{hint}}</p>{{/if}}
+  {{#if previous}}
+  <button type="button" data-action="usePrevious" class="avttm-wide avttm-use-previous">
+    <i class="fa-solid fa-clock-rotate-left" inert></i> {{localize "AVTTM.Use.Previous"}}: {{previous}}
+  </button>
+  {{/if}}
+  <ul class="avttm-list avttm-targets">
+    {{#each targets}}
+    <li>
+      <button type="button" data-action="useTarget" data-token-id="{{id}}" class="{{#if selected}}active{{/if}} avttm-disposition-{{disposition}}"
+              aria-pressed="{{#if selected}}true{{else}}false{{/if}}">
+        <img src="{{img}}" alt=""><span>{{name}}</span><i class="fa-solid {{#if selected}}fa-circle-dot{{else}}fa-circle{{/if}}" inert></i>
+      </button>
+    </li>
+    {{else}}
+    <li class="avttm-muted">{{localize "AVTTM.Targets.None"}}</li>
+    {{/each}}
+  </ul>
+  <p class="avttm-muted avttm-small">{{localize "AVTTM.Targets.Note"}}</p>
+  {{/if}}
+
+  {{#if (eq step "options")}}
+  {{#if (eq options.kind "attack")}}
+  <div class="avttm-segmented avttm-adv" role="radiogroup" aria-label="{{localize 'AVTTM.Dice.NextRoll'}}">
+    {{#each modes}}
+    <button type="button" data-action="useMode" data-mode="{{id}}" role="radio" class="{{#if active}}selected{{/if}} avttm-adv-{{tone}}"
+            aria-checked="{{#if active}}true{{else}}false{{/if}}" aria-label="{{label}}">{{text}}</button>
+    {{/each}}
+  </div>
+  {{#if options.attackModes.length}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.AttackMode"}}</span>
+    <select name="useAttackMode">{{#each options.attackModes}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+  </label>
+  {{/if}}
+  {{#if options.ammunition.length}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.Ammunition"}}</span>
+    <select name="useAmmunition">{{#each options.ammunition}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+  </label>
+  {{/if}}
+  {{#if options.mastery.length}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.Mastery"}}</span>
+    <select name="useMastery">{{#each options.mastery}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+  </label>
+  {{/if}}
+  {{/if}}
+  {{#if simple}}
+  {{!-- SotDL: a whole-number modifier (boons and banes are the choice above). --}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.Modifier"}}</span>
+    <input type="text" name="useBonus" value="{{bonus}}" maxlength="3" inputmode="text" autocomplete="off"
+           placeholder="{{localize 'AVTTM.Use.ModifierPlaceholder'}}">
+  </label>
+  {{else}}
+  <label class="avttm-use-field"><span>{{localize "AVTTM.Use.Bonus"}}</span>
+    <input type="text" name="useBonus" value="{{bonus}}" maxlength="40" inputmode="text" autocomplete="off"
+           placeholder="{{localize 'AVTTM.Use.BonusPlaceholder'}}">
+  </label>
+  {{/if}}
+  {{/if}}
+
+  </div>
+
+  {{#unless (eq step "activity")}}
+  <footer class="avttm-use-footer">
+    <button type="button" data-action="useNext" class="avttm-primary avttm-wide">
+      {{#if last}}<i class="fa-solid fa-hand-sparkles" inert></i> {{confirm}}
+      {{else}}{{localize "AVTTM.Use.Next"}} <i class="fa-solid fa-chevron-right" inert></i>{{/if}}
+    </button>
+  </footer>
+  {{/unless}}
+</div>

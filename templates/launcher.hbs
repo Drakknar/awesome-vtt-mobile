@@ -1,0 +1,108 @@
+{{!-- Quick actions, opened from the pill. A bottom sheet like the character switcher; available from every tab. --}}
+<div class="avttm-sheet-panel avttm-launcher" role="dialog" aria-modal="true" aria-labelledby="avttm-launcher-title">
+  <header>
+    <h3 id="avttm-launcher-title"><i class="fa-solid fa-bolt" inert></i> {{localize "AVTTM.Launcher.Title"}}</h3>
+    <button type="button" data-action="closeOverlay" aria-label="{{localize 'AVTTM.Close'}}"><i class="fa-solid fa-xmark" inert></i></button>
+  </header>
+<div class="avttm-launcher-panel" data-scroll="launcher-{{tab}}">
+  {{#if (eq tab "quick")}}
+  {{!-- Only the character's actions (the Character tab's Actions), one tap away from any tab. --}}
+  {{> "modules/awesome-vtt-mobile/templates/actions.hbs"}}
+  {{/if}}
+
+  {{#if (eq tab "effects")}}
+  {{#if deathSave}}
+  <div class="avttm-launcher-death">
+    <span><i class="fa-solid fa-skull" inert></i> {{localize "AVTTM.Sheet.DeathSaves"}}: ✔ {{death.success}} · ✖ {{death.failure}}</span>
+    <button type="button" data-action="deathSave" class="avttm-primary">{{localize "AVTTM.Sheet.RollDeathSave"}}</button>
+  </div>
+  {{/if}}
+
+  <button type="button" data-action="toggleInspiration" class="avttm-wide avttm-launcher-inspiration {{#if inspiration}}active{{/if}}"
+          aria-pressed="{{#if inspiration}}true{{else}}false{{/if}}"><i class="fa-solid fa-star" inert></i> {{inspirationLabel}}</button>
+
+  {{#if quickConditions.length}}
+  <div class="avttm-launcher-chips">
+    {{#each quickConditions}}
+    <button type="button" data-action="toggleCondition" data-condition="{{id}}" class="{{#if active}}active{{/if}}"
+            aria-pressed="{{#if active}}true{{else}}false{{/if}}"><img src="{{img}}" alt=""> {{label}}</button>
+    {{/each}}
+  </div>
+  {{/if}}
+  <div class="avttm-hp-row">
+    <input type="number" name="hpAmount" min="0" max="999" step="1" inputmode="numeric" placeholder="0" aria-label="{{localize 'AVTTM.Sheet.Amount'}}">
+    <div class="avttm-segmented" role="radiogroup" aria-label="{{localize 'AVTTM.Launcher.HpMode'}}">
+      {{#each hpModes}}
+      <button type="button" data-action="hpMode" data-mode="{{id}}" role="radio" class="avttm-{{id}} {{#if active}}selected{{/if}}"
+              aria-checked="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+      {{/each}}
+    </div>
+    <button type="button" data-action="applyHp" class="avttm-primary">{{localize "AVTTM.Sheet.Apply"}}</button>
+  </div>
+
+  {{#if concentration.length}}
+  <div class="avttm-launcher-group">
+    {{#each concentration}}
+    <div class="avttm-launcher-line">
+      <span><i class="fa-solid fa-brain" inert></i> {{name}}</span>
+      <button type="button" data-action="endConcentration" data-effect-id="{{id}}">{{localize "AVTTM.Launcher.EndConcentration"}}</button>
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if exhaustion}}
+  <div class="avttm-launcher-line">
+    <span>{{localize "AVTTM.Launcher.Exhaustion"}} {{exhaustion.value}}/{{exhaustion.max}}</span>
+    <div class="avttm-launcher-stepper">
+      <button type="button" data-action="exhaustion" data-delta="-1" aria-label="{{localize 'AVTTM.Launcher.ExhaustionLess'}}">−</button>
+      <button type="button" data-action="exhaustion" data-delta="1" aria-label="{{localize 'AVTTM.Launcher.ExhaustionMore'}}">+</button>
+    </div>
+  </div>
+  {{/if}}
+
+  {{!-- Other trackers of the system (SotDL: insanity, corruption). --}}
+  {{#each tracks}}
+  <div class="avttm-launcher-line">
+    <span>{{label}} {{value}}{{#if max}}/{{max}}{{/if}}</span>
+    <div class="avttm-launcher-stepper">
+      <button type="button" data-action="trackAdjust" data-track="{{key}}" data-delta="-1" aria-label="{{localize 'AVTTM.Launcher.Less' name=label}}">−</button>
+      <button type="button" data-action="trackAdjust" data-track="{{key}}" data-delta="1" aria-label="{{localize 'AVTTM.Launcher.More' name=label}}">+</button>
+    </div>
+  </div>
+  {{/each}}
+
+  <section class="avttm-launcher-group">
+  <h4 class="avttm-launcher-heading">{{localize "AVTTM.Launcher.Effects"}}</h4>
+  <ul class="avttm-list">
+    {{#each effects}}
+    <li>
+      <button type="button" data-action="toggleEffect" data-effect-uuid="{{uuid}}" class="{{#if active}}active{{/if}}"
+              aria-pressed="{{#if active}}true{{else}}false{{/if}}">
+        <img src="{{img}}" alt=""><span>{{name}}{{#if source}} <em class="avttm-muted">· {{source}}</em>{{/if}}</span>
+        <i class="fa-solid {{#if active}}fa-toggle-on{{else}}fa-toggle-off{{/if}}" inert></i>
+      </button>
+    </li>
+    {{else}}
+    <li class="avttm-muted">{{localize "AVTTM.Launcher.NoEffects"}}</li>
+    {{/each}}
+  </ul>
+  </section>
+  {{/if}}
+
+  {{#if (eq tab "rest")}}
+  <div class="avttm-launcher-rest">
+    {{#each rests}}
+    <button type="button" data-action="{{action}}"><i class="fa-solid {{icon}}" inert></i> {{label}}</button>
+    {{/each}}
+  </div>
+  {{/if}}
+</div>
+{{!-- The sheet's tabs at the bottom, in thumb reach, as in the Character view. --}}
+<nav class="avttm-subtabs avttm-launcher-tabs">
+  {{#each tabs}}
+  <button type="button" data-action="quickTab" data-tab="{{id}}" class="{{#if active}}active{{/if}}"
+          aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+  {{/each}}
+</nav>
+</div>

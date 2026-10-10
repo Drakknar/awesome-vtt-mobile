@@ -1,0 +1,74 @@
+{{#if entry}}
+<div class="avttm-comp-entry">
+  <div class="avttm-button-row">
+    <button type="button" data-action="compBack"><i class="fa-solid fa-arrow-left" inert></i> {{localize "AVTTM.Utility.Compendium.Back"}}</button>
+    <button type="button" data-action="compOpenSheet"><i class="fa-solid fa-up-right-from-square" inert></i> {{localize "AVTTM.Utility.Compendium.Open"}}</button>
+  </div>
+  <h3>{{#if entry.img}}<img src="{{entry.img}}" alt="">{{/if}}{{entry.name}}</h3>
+  <div class="avttm-comp-content">{{{entry.html}}}</div>
+</div>
+{{else}}
+<div class="avttm-comp-search" role="search">
+  <input type="search" name="compQuery" value="{{query}}" maxlength="64" placeholder="{{localize 'AVTTM.Utility.Compendium.Placeholder'}}"
+         aria-label="{{localize 'AVTTM.Utility.Compendium.Placeholder'}}">
+  {{#if query}}
+  <button type="button" data-action="compClear" data-tooltip="" aria-label="{{localize 'AVTTM.Utility.Compendium.Clear'}}"><i class="fa-solid fa-xmark" inert></i></button>
+  {{/if}}
+  <button type="button" data-action="compSearch" data-tooltip="" aria-label="{{localize 'AVTTM.Utility.Compendium.Search'}}"><i class="fa-solid fa-magnifying-glass" inert></i></button>
+</div>
+{{#if hasBrowser}}
+<button type="button" data-action="compBrowser" class="avttm-wide"><i class="fa-solid fa-filter" inert></i> {{localize "AVTTM.Utility.Compendium.Browse"}}</button>
+{{/if}}
+{{#if query}}
+  {{#if short}}
+  <p class="avttm-muted">{{localize "AVTTM.Utility.Compendium.TypeMore"}}</p>
+  {{else if searching}}
+  <p class="avttm-muted"><i class="fa-solid fa-spinner fa-spin" inert></i> {{localize "AVTTM.Utility.Compendium.Searching"}}</p>
+  {{else if results}}
+  <ul class="avttm-comp-results">
+    {{#each results}}
+    <li><button type="button" data-action="compOpen" data-uuid="{{uuid}}">{{#if img}}<img src="{{img}}" alt="">{{/if}}<span>{{name}}</span><em>{{pack}}</em></button></li>
+    {{else}}
+    <li class="avttm-muted">{{localize "AVTTM.Utility.Compendium.NoResults"}}</li>
+    {{/each}}
+  </ul>
+  {{/if}}
+{{else if pack}}
+  {{!-- Browsing inside one compendium: breadcrumb, subfolders, entries. --}}
+  <nav class="avttm-comp-crumbs" aria-label="{{localize 'AVTTM.Utility.Compendium.Path'}}">
+    <button type="button" data-action="compBrowse"><i class="fa-solid fa-book-atlas" inert></i> {{localize "AVTTM.Utility.Compendium.All"}}</button>
+    <span aria-hidden="true">›</span>
+    <button type="button" data-action="compBrowse" data-pack="{{pack.id}}" class="{{#unless pack.path.length}}active{{/unless}}">{{pack.title}}</button>
+    {{#each pack.path}}
+    <span aria-hidden="true">›</span>
+    <button type="button" data-action="compBrowse" data-pack="{{@root.pack.id}}" data-folder="{{id}}" class="{{#if @last}}active{{/if}}">{{name}}</button>
+    {{/each}}
+  </nav>
+  <ul class="avttm-comp-results">
+    {{#each pack.folders}}
+    <li><button type="button" data-action="compBrowse" data-pack="{{@root.pack.id}}" data-folder="{{id}}"><i class="fa-solid fa-folder" inert></i><span>{{name}}</span></button></li>
+    {{/each}}
+    {{#each pack.entries}}
+    <li><button type="button" data-action="compOpen" data-uuid="{{uuid}}">{{#if img}}<img src="{{img}}" alt="">{{/if}}<span>{{name}}</span></button></li>
+    {{/each}}
+    {{#unless pack.folders.length}}{{#unless pack.entries.length}}<li class="avttm-muted">{{localize "AVTTM.Utility.Compendium.Empty"}}</li>{{/unless}}{{/unless}}
+  </ul>
+  {{#if pack.more}}
+  <button type="button" data-action="compMore" class="avttm-comp-more">{{localize "AVTTM.Utility.Compendium.More"}} ({{pack.entries.length}}/{{pack.total}})</button>
+  {{/if}}
+{{else}}
+  {{!-- Empty search: every compendium the user can see, grouped by where it comes from. --}}
+  {{#each packs}}
+  <section class="avttm-group">
+    <h4>{{label}}</h4>
+    <ul class="avttm-comp-results">
+      {{#each packs}}
+      <li><button type="button" data-action="compBrowse" data-pack="{{id}}"><i class="{{icon}}" inert></i><span>{{title}}</span>{{#if count}}<em>{{count}}</em>{{/if}}</button></li>
+      {{/each}}
+    </ul>
+  </section>
+  {{else}}
+  <p class="avttm-muted">{{localize "AVTTM.Utility.Compendium.None"}}</p>
+  {{/each}}
+{{/if}}
+{{/if}}

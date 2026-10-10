@@ -1,0 +1,50 @@
+{{!-- Action rows (Character tab Actions and the quick actions sheet): each group of usable items, with slots and uses. --}}
+{{#each actions}}
+<section class="avttm-group">
+  <h4>{{label}}
+    {{#if slots}}
+    {{!-- Slots left, editable to undo an accidental cast. --}}
+    <span class="avttm-slots avttm-adjust">
+      {{localize "AVTTM.Sheet.Slots"}}
+      <button type="button" data-action="slotAdjust" data-slot="{{slots.key}}" data-delta="-1" aria-label="{{localize 'AVTTM.Sheet.SlotLess'}}">−</button>
+      <span>{{slots.value}}/{{slots.max}}</span>
+      <button type="button" data-action="slotAdjust" data-slot="{{slots.key}}" data-delta="1" aria-label="{{localize 'AVTTM.Sheet.SlotMore'}}">+</button>
+    </span>
+    {{/if}}
+  </h4>
+  <ul class="avttm-item-list">
+    {{#each items}}
+    <li class="avttm-item-row">
+      <button type="button" data-action="useItem" data-item-id="{{id}}"><img src="{{img}}" alt=""><span>{{name}}</span></button>
+      {{#if usesMax}}
+      {{!-- Uses left, editable to undo an accidental use. --}}
+      <span class="avttm-adjust">
+        <button type="button" data-action="usesAdjust" data-item-id="{{id}}" data-delta="-1" aria-label="{{localize 'AVTTM.Sheet.UseLess'}}">−</button>
+        <span>{{usesValue}}/{{usesMax}}</span>
+        <button type="button" data-action="usesAdjust" data-item-id="{{id}}" data-delta="1" aria-label="{{localize 'AVTTM.Sheet.UseMore'}}">+</button>
+      </span>
+      {{/if}}
+      {{!-- What the action does: the item's description, shown under the row (same as the inventory's). --}}
+      {{#if @root.canFavorite}}
+      <button type="button" data-action="toggleFavorite" data-item-id="{{id}}" class="avttm-favorite {{#if favorite}}active{{/if}}"
+              aria-label="{{#if favorite}}{{localize 'AVTTM.Sheet.Unfavorite' name=name}}{{else}}{{localize 'AVTTM.Sheet.Favorite' name=name}}{{/if}}"
+              aria-pressed="{{#if favorite}}true{{else}}false{{/if}}">
+        <i class="{{#if favorite}}fa-solid{{else}}fa-regular{{/if}} fa-star" inert></i>
+      </button>
+      {{/if}}
+      <button type="button" data-action="invDetails" data-item-id="{{id}}"
+              class="avttm-item-info {{#if (lookup @root.state.inv.details id)}}active{{/if}}"
+              aria-label="{{localize 'AVTTM.Sheet.About' name=name}}"
+              aria-expanded="{{#if (lookup @root.state.inv.details id)}}true{{else}}false{{/if}}">
+        <i class="fa-solid fa-circle-info" inert></i>
+      </button>
+      {{#with (lookup @root.state.inv.details id) as |html|}}
+      <div class="avttm-inv-details avttm-item-details">{{{html}}}</div>
+      {{/with}}
+    </li>
+    {{/each}}
+  </ul>
+</section>
+{{else}}
+<p class="avttm-muted">{{localize "AVTTM.Sheet.NoActions"}}</p>
+{{/each}}

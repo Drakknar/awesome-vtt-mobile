@@ -1,0 +1,358 @@
+{
+  "AVTTM": {
+    "Close": "Close",
+    "Tabs": {
+      "Label": "Sections",
+      "character": "Character",
+      "chat": "Chat",
+      "journal": "Journal",
+      "compendium": "Compendium",
+      "settings": "Settings",
+      "dice": "Dice",
+      "party": "Party"
+    },
+    "Mode": {
+      "AskTitle": "Use phone mode?",
+      "AskContent": "This looks like a phone. Phone mode shows your character, chat, journals and compendium in a phone layout, and turns the map off on this device to save battery. You can change this later in Settings.",
+      "AskYes": "Use phone mode",
+      "AskNo": "Keep the normal view",
+      "Reloading": "Switching view…"
+    },
+    "Character": {
+      "Pick": "Choose your character",
+      "None": "You don't own a character yet. Ask your GM to assign one.",
+      "Switch": "Switch character"
+    },
+    "Sheet": {
+      "Level": "Level",
+      "Amount": "Amount",
+      "Apply": "Apply",
+      "Normal": "Normal",
+      "Advantage": "Advantage",
+      "Disadvantage": "Disadvantage",
+      "Tab": {
+        "actions": "Actions",
+        "skills": "Skills",
+        "spells": "Spells",
+        "abilities": "Abilities",
+        "inventory": "Inventory",
+        "status": "Status"
+      },
+      "Slots": "Slots",
+      "NoActions": "Nothing to use.",
+      "Check": "Check",
+      "Save": "Save",
+      "Inspiration": "Inspiration",
+      "ShortRest": "Short rest",
+      "LongRest": "Long rest",
+      "DeathSaves": "Death saves",
+      "RollDeathSave": "Roll death save",
+      "Conditions": "Conditions",
+      "SlotLess": "One slot less",
+      "SlotMore": "One slot more",
+      "UseLess": "One use less",
+      "UseMore": "One use more",
+      "About": "What {name} does",
+      "Favorite": "Add {name} to favorites",
+      "Unfavorite": "Remove {name} from favorites"
+    },
+    "Inventory": {
+      "Currency": "Currency",
+      "Weight": "Weight",
+      "Attunement": "Attuned items",
+      "Empty": "No items.",
+      "Less": "Remove one",
+      "More": "Add one",
+      "Equipped": "Equipped",
+      "Attuned": "Attuned",
+      "Use": "Use",
+      "NoDescription": "No description.",
+      "ToParty": "Give to the party"
+    },
+    "Journal": {
+      "Shared": "Recently shared",
+      "Placeholder": "Filter journals…",
+      "None": "No journals available.",
+      "Back": "Back",
+      "OpenFull": "Open full journal",
+      "External": "This page type opens in the full journal.",
+      "NoPages": "No pages you can view.",
+      "Untitled": "Shared image"
+    },
+    "Utility": {
+      "Compendium": {
+        "Placeholder": "Search or browse items, spells, rules…",
+        "Searching": "Searching…",
+        "NoResults": "No results.",
+        "Back": "Back",
+        "Open": "Open",
+        "Browse": "Browse compendiums",
+        "TypeMore": "Type at least 2 characters to search.",
+        "Clear": "Clear search",
+        "Path": "Compendium path",
+        "All": "Compendiums",
+        "Empty": "This folder is empty.",
+        "More": "Show more",
+        "None": "No compendiums available.",
+        "Search": "Search"
+      }
+    },
+    "Combat": {
+      "Round": "Round",
+      "Roll": "Roll initiative",
+      "EndTurn": "End turn"
+    },
+    "Turn": {
+      "Now": "Your turn, {name}!",
+      "Next": "You're next: {name}",
+      "Test": "Test",
+      "ThemeActive": "Foundry's combat theme plays its own turn sounds on this device, so the alert sound is skipped. Set Combat Theme to None in Foundry's settings to use this sound instead."
+    },
+    "Targets": {
+      "None": "No tokens to target in the active scene.",
+      "Unknown": "Unknown creature",
+      "Note": "Without the map, line of sight isn't checked. Your targets are shown to the GM and on the table screen."
+    },
+    "SettingsView": {
+      "Phone": "This device",
+      "Turn": "Your-turn alert",
+      "Dice": "Dice",
+      "GM": "GM options",
+      "TestAlert": "Test the alert",
+      "HomeScreen": "Add to home screen",
+      "FoundrySettings": "Foundry settings",
+      "LogOut": "Log out",
+      "NeedsTableModule": "Needs the Awesome VTT module to be active in this world.",
+      "WakeLockUnsupported": "This browser can't keep the screen on (it needs HTTPS and a recent browser).",
+      "HomeScreenIOS": "In Safari, tap the Share button, then \"Add to Home Screen\".",
+      "HomeScreenOther": "Open your browser's menu and choose \"Add to Home screen\" or \"Install app\".",
+      "Automation": "Automation",
+      "Seat": "Table seat",
+      "SeatHint": "Where your character sits around the table screen. Picking a taken seat swaps the two characters.",
+      "NotSeated": "— Not at the table —"
+    },
+    "Settings": {
+      "phoneMode": {
+        "Name": "Phone mode",
+        "Hint": "Show the phone layout on this device. \"Ask on phones\" asks once on touch devices with a small screen.",
+        "Choices": {
+          "auto": "Ask on phones",
+          "on": "On",
+          "off": "Off"
+        }
+      },
+      "disableMap": {
+        "Name": "Turn off the map",
+        "Hint": "While phone mode is on, don't load the map on this device (Foundry's No-Canvas mode). Saves battery and data. Changing this reloads the page."
+      },
+      "keepAwake": {
+        "Name": "Keep the screen on",
+        "Hint": "Stops the screen from dimming or locking while Foundry is open. Needs HTTPS and a supporting browser."
+      },
+      "turnAlert": {
+        "Name": "Your-turn alert",
+        "Hint": "Show a banner when a combatant you own starts its turn."
+      },
+      "turnAlertNext": {
+        "Name": "Alert when you're next",
+        "Hint": "Also show a banner when a combatant you own is next in the turn order."
+      },
+      "turnAlertVibrate": {
+        "Name": "Vibrate",
+        "Hint": "Vibrate on your turn. Supported on Android; iPhones don't allow websites to vibrate."
+      },
+      "turnAlertSound": {
+        "Name": "Sound",
+        "Hint": "Sound for your turn. Skipped when Foundry's own Combat Theme is set, which already plays turn sounds.",
+        "Choices": {
+          "none": "None",
+          "notify": "Notification",
+          "horn": "Drum hit",
+          "voice": "Voice (\"You are up\")",
+          "custom": "Custom file"
+        }
+      },
+      "turnAlertSoundPath": {
+        "Name": "Custom sound file",
+        "Hint": "Path of a sound file on the Foundry server, for the \"Custom file\" sound."
+      },
+      "turnAlertVolume": {
+        "Name": "Sound volume",
+        "Hint": "Volume of the alert sound."
+      },
+      "physicalDice": {
+        "Name": "Physical dice on this phone",
+        "Hint": "Enter the results of real dice on this phone. Uses the Awesome VTT module's dice entry; its Physical dice setting decides whether the GM enters them instead."
+      },
+      "targetList": {
+        "Name": "Phone target list",
+        "Hint": "Which tokens of the active scene players can target from their phones. Without the map, Foundry can't check line of sight, so \"All\" may list creatures a character couldn't see.",
+        "Choices": {
+          "all": "All tokens that aren't hidden",
+          "combat": "Combatants and player characters",
+          "off": "Off"
+        }
+      },
+      "homeScreen": {
+        "Name": "Home screen shortcut",
+        "Hint": "Let players add Foundry to their phone's home screen, opening it full screen with its own icon."
+      },
+      "autoDeathSaves": {
+        "Name": "Prompt for death saves",
+        "Hint": "At the start of your turn in combat, if your character is at 0 HP and neither stable nor dead, ask for the death saving throw straight away."
+      },
+      "autoConcentration": {
+        "Name": "Prompt for concentration checks",
+        "Hint": "When your concentrating character takes damage, ask for the Constitution saving throw straight away, with the DC dnd5e works out."
+      },
+      "autoSaves": {
+        "Name": "Prompt for saving throws",
+        "Hint": "When a spell or ability that calls for a saving throw targets your character (e.g. a monster's breath weapon), ask for the save with its DC."
+      },
+      "autoRequests": {
+        "Name": "Prompt for GM requests",
+        "Hint": "When the GM asks the party to rest or to make a group check or save (D&D 5e), or asks you for a challenge roll (Shadow of the Demon Lord), ask you to take part straight away."
+      },
+      "autoInitiative": {
+        "Name": "Prompt to roll initiative",
+        "Hint": "When your character joins an encounter without initiative, ask you to roll it (in Shadow of the Demon Lord: to choose a fast or slow turn)."
+      },
+      "rollToasts": {
+        "Name": "Show roll results",
+        "Hint": "After you roll (checks, saves, attacks, damage, healing, the dice pool), with Foundry or real dice, show the result for a few seconds, once Dice So Nice has finished, with pass or fail against a DC, and hit or miss if dnd5e shows attack results to players. Blind rolls are not shown. Tap it to dismiss."
+      },
+      "autoDamage": {
+        "Name": "Roll damage with attacks",
+        "Hint": "D&D 5e only: after an attack roll, roll its damage straight away (hit or miss; critical damage on a critical hit). In Shadow of the Demon Lord, roll damage with the attack card's button."
+      }
+    },
+    "Chat": {
+      "Earlier": "Show earlier messages",
+      "Mode": "Who sees your messages and rolls",
+      "Placeholder": "Message, or a command such as /r 1d20",
+      "Send": "Send",
+      "Filter": {
+        "Label": "Which messages to show",
+        "all": "All",
+        "mine": "Mine"
+      }
+    },
+    "Dice": {
+      "NextRoll": "Next roll",
+      "NextRollHint": "Applies to your next d20 roll (checks, saves, skills, attacks, or a d20 below), then goes back to Normal. While it's armed, the pill shows ADV or DIS.",
+      "Roller": "Roll dice",
+      "Source": "Dice source",
+      "Physical": "Real dice",
+      "Digital": "Foundry rolls",
+      "Minus": "Modifier minus one",
+      "Plus": "Modifier plus one",
+      "Modifier": "Modifier",
+      "Empty": "Tap dice to build a roll",
+      "Clear": "Clear",
+      "EnterResults": "Enter results",
+      "Roll": "Roll",
+      "Flavor": "Phone roll",
+      "AdvShort": "ADV",
+      "DisShort": "DIS",
+      "RemoveOne": "Remove one {die}",
+      "AddOne": "Add one {die}"
+    },
+    "Use": {
+      "Back": "Back",
+      "Next": "Next",
+      "Confirm": "Use",
+      "ConfirmTargets": "Continue",
+      "Previous": "Same as last time",
+      "Step": "Step {n} of {total}: {name}",
+      "Steps": {
+        "targets": "Targets",
+        "options": "Roll options",
+        "usage": "Casting"
+      },
+      "OneTarget": "Choose 1 target.",
+      "TargetCount": "Choose up to {count} targets.",
+      "AreaHint": "This covers an area. Choose the creatures inside it (the map isn't shown on the phone).",
+      "AttackMode": "Attack mode",
+      "Ammunition": "Ammunition",
+      "Mastery": "Weapon mastery",
+      "Bonus": "Situational bonus",
+      "BonusPlaceholder": "e.g. 2 or 1d4 (optional)",
+      "BadBonus": "The situational bonus isn't a valid roll formula.",
+      "CastAt": "Cast at level",
+      "ConsumeSlot": "Use a spell slot",
+      "Concentrate": "Concentrate on it",
+      "EndConcentration": "Stop concentrating on",
+      "ConsumeResources": "Use resources and item uses",
+      "AreaSkipped": "The area isn't placed from the phone (the map is off). The GM or the table screen can place it.",
+      "Scaling": "Use at",
+      "Enchantment": "Enchantment",
+      "Summon": "Creature",
+      "SummonSize": "Size",
+      "SummonType": "Creature type",
+      "Transform": "Form",
+      "ConsumeLinked": "Use {name}'s charges or uses",
+      "SummonsSkipped": "The creatures aren't placed from the phone (the map is off). Use Summon on the chat card from the table screen, or ask the GM.",
+      "Modifier": "Modifier",
+      "ModifierPlaceholder": "e.g. +1 or -2",
+      "BadModifier": "The modifier must be a whole number, such as +1 or -2."
+    },
+    "Pill": {
+      "AC": "Armor class",
+      "Initiative": "Initiative bonus",
+      "Speed": "Speed",
+      "Favorites": "Favorites",
+      "FavoritesHint": "Star actions or items in the Character tab to add them here."
+    },
+    "Launcher": {
+      "Title": "Quick actions",
+      "HpMode": "Damage, healing or temporary HP",
+      "Hp": {
+        "damage": "Damage",
+        "heal": "Heal",
+        "temp": "Temp"
+      },
+      "EndConcentration": "End",
+      "Exhaustion": "Exhaustion",
+      "ExhaustionLess": "One level less",
+      "ExhaustionMore": "One level more",
+      "Effects": "Effects",
+      "Tab": {
+        "quick": "Quick actions",
+        "effects": "Damage & effects",
+        "rest": "Rest"
+      },
+      "NoEffects": "Nothing to switch on or off right now. Effects such as Rage, Bladesong, or an item's or spell's toggleable effect appear here.",
+      "Less": "One less {name}",
+      "More": "One more {name}"
+    },
+    "DeathSave": {
+      "Successes": "Successes",
+      "Failures": "Failures"
+    },
+    "Prompt": {
+      "Later": "Not now",
+      "More": "{count} more waiting"
+    },
+    "Toast": {
+      "Damage": "damage",
+      "Healing": "healing",
+      "Critical": "Critical",
+      "Fumble": "Fumble",
+      "Success": "Pass",
+      "Failure": "Fail",
+      "Hit": "Hit",
+      "Miss": "Miss",
+      "HitCount": "{hit} hit, {miss} missed",
+      "Dismiss": "Tap to dismiss.",
+      "RollDamage": "Roll damage"
+    },
+    "Spells": {
+      "None": "No spells.",
+      "Prepare": "Prepare {name}",
+      "Unprepare": "Unprepare {name}",
+      "Always": "Always prepared",
+      "Concentration": "Concentration",
+      "Ritual": "Ritual"
+    }
+  }
+}

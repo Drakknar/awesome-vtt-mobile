@@ -1,0 +1,736 @@
+/* ============================================================
+   Awesome VTT – Phone Companion
+   Everything is scoped to body.avttm-phone, so other devices are unaffected.
+   ============================================================ */
+
+body.avttm-phone {
+  --avttm-bg: #16161d;
+  --avttm-panel: #1f1f28;
+  --avttm-raised: rgba(255, 255, 255, 0.08);
+  --avttm-hover: rgba(255, 255, 255, 0.16);
+  --avttm-border: rgba(255, 255, 255, 0.18);
+  --avttm-text: #f1f1f4;
+  --avttm-muted: #a8a8b3;
+  --avttm-accent: #5cb85c;
+  --avttm-hp: #3fb950;
+  --avttm-danger: #f85149;
+  --avttm-temp: #58a6ff;
+  --avttm-touch: 44px;
+  --avttm-tabbar-height: 0px;
+  /* Above Foundry's windows, which start at --z-index-window (100) and go up by one each time one comes to the front.
+     Only the browser's top layer (modal dialogs, tooltips) is drawn above this. */
+  --avttm-tabbar-z: 2000000000;
+  background: var(--avttm-bg);
+  overscroll-behavior: none;
+}
+
+/* ---------- Foundry's desktop interface ---------- */
+
+/* The map, HUD, pause banner and desktop panels are not used on the phone. */
+body.avttm-phone #interface > :not(#ui-right),
+body.avttm-phone #ui-right-column-1,
+body.avttm-phone #hud,
+body.avttm-phone #pause,
+body.avttm-phone #board,
+body.avttm-phone #chat-notifications,
+body.avttm-phone #camera-views { display: none !important; }
+
+/* The phone draws its own chat, so Foundry's sidebar is never shown. */
+body.avttm-phone #ui-right { display: none !important; }
+
+/* ---------- App frame ---------- */
+
+#avttm-app {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  color: var(--avttm-text);
+  background: var(--avttm-bg);
+  font-size: 16px;
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* Room for the tab bar, which is fixed to the bottom of the screen in its own layer. */
+  padding-bottom: var(--avttm-tabbar-height);
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+#avttm-app [hidden] { display: none !important; }
+
+#avttm-app button {
+  font: inherit;
+  color: inherit;
+  min-height: var(--avttm-touch);
+  padding: 0.3em 0.8em;
+  background: var(--avttm-raised);
+  border: 1px solid var(--avttm-border);
+  border-radius: 0.6em;
+  line-height: 1.2;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#avttm-app button:active { background: var(--avttm-hover); }
+#avttm-app button.active { background: var(--avttm-accent); border-color: var(--avttm-accent); color: #111; }
+#avttm-app button:disabled { opacity: 0.4; }
+/* A button whose action is still running (see BUSY_ACTIONS). */
+#avttm-app button[aria-busy="true"] { opacity: 0.6; cursor: progress; animation: avttm-busy 1s ease-in-out infinite; }
+@keyframes avttm-busy { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { #avttm-app button[aria-busy="true"] { animation: none; } }
+#avttm-app button:focus { box-shadow: none; outline: none; }
+#avttm-app button:focus-visible { outline: 2px solid var(--avttm-accent); outline-offset: 1px; }
+#avttm-app input:not([type="checkbox"], [type="radio"], [type="range"]),
+#avttm-app select,
+#avttm-app textarea {
+  font: inherit;
+  font-size: 16px;
+  color: inherit;
+  min-height: var(--avttm-touch);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--avttm-border);
+  border-radius: 0.5em;
+  padding: 0.2em 0.6em;
+  box-sizing: border-box;
+}
+.avttm-muted { color: var(--avttm-muted); }
+.avttm-small { font-size: 0.85em; }
+.avttm-warning { color: var(--avttm-danger); }
+.avttm-primary { background: var(--avttm-accent) !important; border-color: var(--avttm-accent) !important; color: #111 !important; font-weight: bold; }
+.avttm-wide { width: 100%; }
+
+/* Header */
+/* Character pill: at the bottom of the app, just above the tab bar. */
+.avttm-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 0.8em;
+  background: var(--avttm-panel);
+  border-top: 1px solid var(--avttm-border);
+  flex: none;
+}
+.avttm-top-portrait.dying { filter: grayscale(1); border-color: var(--avttm-danger); }
+.avttm-pill-switch, .avttm-pill-launcher { flex: none; min-width: var(--avttm-touch); padding-inline: 0 !important; }
+.avttm-inspired { color: gold; }
+
+/* Quick actions: a bottom sheet like the character switcher; its content scrolls under a fixed header. */
+/* Sections of the quick actions sheet, divided by a line with a little padding. */
+.avttm-launcher-panel { display: flex; flex-direction: column; gap: 0.6em; }
+.avttm-launcher-panel > * + * { border-top: 1px solid var(--avttm-border); padding-top: 0.6em; }
+.avttm-launcher-group { display: flex; flex-direction: column; gap: 0.4em; }
+.avttm-sheet-panel > .avttm-launcher-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.avttm-launcher header h3 { display: flex; gap: 0.5em; align-items: center; }
+.avttm-launcher-line { display: flex; gap: 0.5em; align-items: center; justify-content: space-between; }
+.avttm-launcher-line > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-launcher-stepper { display: flex; gap: 0.3em; flex: none; }
+.avttm-launcher-stepper button { min-width: var(--avttm-touch); padding-inline: 0 !important; }
+/* Quick conditions on one line that scrolls sideways (the scroll stays inside the row). */
+.avttm-launcher-chips {
+  display: flex; flex-wrap: nowrap; gap: 0.3em;
+  overflow-x: auto; overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+.avttm-launcher-chips::-webkit-scrollbar { display: none; }
+.avttm-launcher-chips button {
+  flex: none; display: flex; gap: 0.3em; align-items: center; font-size: 0.9em;
+  white-space: nowrap; scroll-snap-align: start;
+}
+.avttm-launcher-chips img { width: 1.3em; height: 1.3em; border: none; }
+.avttm-launcher-heading { margin: 0.2em 0 0; color: var(--avttm-accent); }
+/* Automation prompts (death saves, concentration, saving throws, GM requests, initiative) */
+.avttm-prompt header h3 { display: flex; gap: 0.5em; align-items: center; }
+.avttm-prompt p { margin: 0; }
+.avttm-prompt .avttm-launcher-panel > * + * { border-top: none; padding-top: 0; }
+.avttm-prompt-choices { display: flex; flex-direction: column; gap: 0.4em; }
+.avttm-prompt-deathSave { border-top-color: var(--avttm-danger); }
+.avttm-prompt-deathSave header h3 { color: var(--avttm-danger); }
+.avttm-death-tally { display: flex; flex-direction: column; gap: 0.3em; }
+.avttm-death-row { display: flex; gap: 0.4em; align-items: center; }
+.avttm-death-row i { font-size: 1.3em; }
+.avttm-death-row.success i { color: var(--avttm-hp); }
+.avttm-death-row.failure i { color: var(--avttm-danger); }
+.avttm-launcher-death {
+  display: flex; gap: 0.5em; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  padding: 0.5em; border: 1px solid var(--avttm-danger); border-radius: 0.6em;
+}
+.avttm-launcher-inspiration.active { background: gold !important; border-color: gold !important; color: #111 !important; }
+.avttm-roll-chip {
+  flex: none;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  color: #111 !important;
+  border: none !important;
+}
+.avttm-roll-chip.avttm-roll-adv { background: var(--avttm-hp) !important; }
+.avttm-roll-chip.avttm-roll-dis { background: var(--avttm-danger) !important; }
+.avttm-top-portrait { width: 3.6em; height: 3.6em; border-radius: 50%; object-fit: cover; border: 2px solid var(--avttm-accent); flex: none; }
+.avttm-top-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.3em; }
+.avttm-top-name { display: flex; gap: 0.5em; align-items: baseline; min-width: 0; }
+.avttm-top-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-top-name span { flex: none; font-size: 0.8em; white-space: nowrap; }
+.avttm-top-stats { display: flex; gap: 0.9em; align-items: center; font-size: 0.9em; }
+.avttm-top-stats .avttm-roll-chip { min-height: 0 !important; padding: 0.2em 0.6em !important; }
+
+/* HP bars */
+.avttm-hp-bar {
+  position: relative;
+  height: 1.5em;
+  border-radius: 0.75em;
+  background: linear-gradient(to right, var(--avttm-hp) var(--hp-pct), rgba(255, 255, 255, 0.1) var(--hp-pct));
+  text-align: center;
+  line-height: 1.5em;
+  font-size: 0.9em;
+  text-shadow: 0 0 3px #000;
+}
+.avttm-hp-bar.small { height: 1.1em; line-height: 1.1em; font-size: 0.75em; }
+.avttm-hp-bar em { color: var(--avttm-temp); font-style: normal; }
+
+/* Turn banner and combat strip */
+.avttm-turn {
+  flex: none;
+  width: 100%;
+  border-radius: 0 !important;
+  border: none !important;
+  background: var(--avttm-accent) !important;
+  color: #111 !important;
+  font-weight: bold;
+  font-size: 1.1em;
+  animation: avttm-pulse 1.4s ease-in-out infinite;
+}
+.avttm-turn.next { background: #d4a72c !important; animation: none; }
+@keyframes avttm-pulse { 50% { filter: brightness(1.25); } }
+@media (prefers-reduced-motion: reduce) { .avttm-turn { animation: none; } }
+
+.avttm-combat { flex: none; padding: 0.3em 0.6em; background: var(--avttm-panel); border-bottom: 1px solid var(--avttm-border); }
+.avttm-combat-row { display: flex; gap: 0.5em; align-items: center; }
+.avttm-combat-list { flex: 1; min-width: 0; display: flex; gap: 0.3em; margin: 0; padding: 0; list-style: none; overflow-x: auto; }
+.avttm-combat-list li {
+  flex: none; display: flex; flex-direction: column; align-items: center;
+  width: 3.4em; padding: 0.15em; font-size: 0.7em;
+  border: 1px solid transparent; border-radius: 0.4em;
+}
+.avttm-combat-list li img { width: 2.4em; height: 2.4em; border-radius: 50%; object-fit: cover; border: none; }
+.avttm-combat-list li span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-combat-list li em { font-style: normal; font-weight: bold; }
+.avttm-combat-list li.current { border-color: gold; background: rgba(255, 215, 0, 0.15); }
+.avttm-combat-list li.mine img { outline: 2px solid var(--avttm-accent); }
+.avttm-combat-list li.defeated { opacity: 0.4; }
+
+/* Views */
+.avttm-main { flex: 1; min-height: 0; position: relative; }
+/* Items in a scrolling view keep their size: without flex-shrink: 0, a long list (e.g. the inventory) would squeeze
+   rows that can scroll sideways, such as the Character tab's section tabs, down to nothing. */
+.avttm-view > *, .avttm-sheet-body > * { flex-shrink: 0; }
+/* Short content sits at the bottom, next to the pill and tabs (in thumb reach). An automatic top margin does this
+   without hiding anything: once content is taller than the space, the margin is 0 and the panel scrolls as usual. */
+.avttm-view > :first-child,
+.avttm-view[data-view="character"] > .avttm-sheet-body > :first-child,
+.avttm-chat-log > :first-child { margin-top: auto; }
+.avttm-view {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.8em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  box-sizing: border-box;
+}
+
+/* Tab bar: fixed to the bottom, above every Foundry window. */
+.avttm-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--avttm-tabbar-z);
+  display: flex;
+  /* On narrow screens the tabs keep a readable width and the bar scrolls sideways instead. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  color: var(--avttm-text);
+  font-size: 16px;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  background: var(--avttm-panel);
+  border-top: 1px solid var(--avttm-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.avttm-tabbar::-webkit-scrollbar { display: none; }
+/* While measuring, tabs take their natural width. */
+.avttm-tabbar.avttm-measuring button { flex: none !important; min-width: 0 !important; }
+.avttm-tabbar button {
+  margin: 0;
+  padding: 0.3em 0.4em !important;
+  /* Same width for every tab (--avttm-tab-width is the widest label, measured by the app), sharing spare room. */
+  min-width: var(--avttm-tab-width, 5.5em);
+  white-space: nowrap;
+  scroll-snap-align: start;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  position: relative;
+  flex: 1 0 var(--avttm-tab-width, 5.5em);
+  display: flex; flex-direction: column; align-items: center; gap: 0.15em;
+  min-height: 3.6em !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--avttm-muted) !important;
+  font-size: 0.72em !important;
+}
+.avttm-tabbar button i { font-size: 1.6em; }
+.avttm-tabbar button.active { color: var(--avttm-accent) !important; }
+.avttm-tabbar button.avttm-attention::after {
+  content: ""; position: absolute; top: 0.6em; right: calc(50% - 1.3em);
+  width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--avttm-danger);
+}
+.avttm-badge {
+  position: absolute; top: 0.3em; right: calc(50% - 1.9em);
+  min-width: 1.4em; padding: 0 0.3em; border-radius: 0.7em;
+  background: var(--avttm-danger); color: #fff; font-style: normal; font-size: 0.85em; line-height: 1.4em;
+}
+
+/* ---------- Shared building blocks ---------- */
+
+.avttm-card { margin: 0; padding: 0.8em; background: var(--avttm-panel); border: 1px solid var(--avttm-border); border-radius: 0.8em; }
+.avttm-card h2 { margin: 0 0 0.5em; font-size: 1.2em; }
+.avttm-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4em; }
+.avttm-list button { width: 100%; display: flex; gap: 0.7em; align-items: center; text-align: left; }
+.avttm-list img { width: 2.4em; height: 2.4em; border-radius: 50%; object-fit: cover; border: none; flex: none; }
+.avttm-list span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-button-row { display: flex; gap: 0.5em; flex-wrap: wrap; }
+.avttm-button-row > button { flex: 1; }
+.avttm-button-column { display: flex; flex-direction: column; gap: 0.5em; }
+.avttm-segmented { display: flex; }
+.avttm-segmented button { flex: 1; border-radius: 0 !important; }
+.avttm-segmented button:first-child { border-radius: 0.6em 0 0 0.6em !important; }
+.avttm-segmented button:last-child { border-radius: 0 0.6em 0.6em 0 !important; }
+.avttm-segmented button + button { border-left: none; }
+/* #avttm-app: class-only states would lose to the base `#avttm-app button` rule. */
+#avttm-app .avttm-segmented button.selected { background: var(--avttm-accent); color: #111; font-weight: bold; }
+#avttm-app .avttm-segmented .avttm-damage.selected, #avttm-app .avttm-adv .avttm-adv-dis.selected { background: var(--avttm-danger); }
+#avttm-app .avttm-segmented .avttm-heal.selected { background: var(--avttm-hp); }
+#avttm-app .avttm-segmented .avttm-temp.selected { background: var(--avttm-temp); }
+
+/* ---------- Character ---------- */
+
+.avttm-hp-row { display: flex; gap: 0.4em; }
+.avttm-hp-row input { width: 4.5em; text-align: center; }
+.avttm-hp-row .avttm-segmented { flex: 1; }
+/* Character tab: only the section list scrolls; its tabs are a fixed row at the bottom (in thumb reach), so
+   nothing can scroll past below them. (The character picker, shown without a character, scrolls normally.) */
+.avttm-view[data-view="character"]:has(> .avttm-subtabs) { overflow: hidden; padding-bottom: 0; }
+.avttm-view[data-view="character"] > .avttm-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.avttm-subtabs {
+  flex: none;
+  display: flex; gap: 0.3em; overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 0.4em;
+  background: var(--avttm-bg);
+  border-top: 1px solid var(--avttm-border);
+}
+.avttm-subtabs::-webkit-scrollbar { display: none; }
+.avttm-subtabs button { flex: none; }
+.avttm-sheet-body { display: flex; flex-direction: column; gap: 0.8em; }
+.avttm-group h4 {
+  display: flex; justify-content: space-between;
+  margin: 0 0 0.4em; padding-bottom: 0.2em;
+  border-bottom: 1px solid var(--avttm-border);
+  color: var(--avttm-accent);
+}
+.avttm-slots { color: var(--avttm-text); font-weight: normal; }
+/* − n/max + controls for spell slots and item uses (to undo an accidental use). */
+/* Compact: its own text size (not the heading's), small buttons and little space around the value. */
+.avttm-adjust { display: inline-flex; gap: 0.15em; align-items: center; flex: none; font-size: 14px; line-height: 1; }
+.avttm-adjust > span { min-width: 2.2em; padding-inline: 0.1em; text-align: center; font-weight: bold; }
+/* Space between the "Slots" label and its − n/max + group. */
+.avttm-slots.avttm-adjust > button:first-of-type { margin-left: 0.5em; }
+#avttm-app .avttm-adjust button {
+  width: 1.9em; min-width: 0;
+  height: 1.9em; min-height: 0;
+  padding: 0 !important;
+  border-radius: 0.4em;
+  font-size: 1em;
+  line-height: 1;
+}
+.avttm-group h4 { align-items: center; }
+.avttm-item-row { display: flex; flex-wrap: wrap; gap: 0.4em; align-items: center; }
+.avttm-item-row > button { flex: 1; min-width: 0; }
+/* Small square buttons beside a row's name (description, favorite star, prepare): their own size, not stretched
+   like the row's main button. */
+.avttm-item-list :is(.avttm-item-info, .avttm-favorite, .avttm-spell-prepare),
+.avttm-inv-row > .avttm-favorite { flex: none; width: auto; min-width: var(--avttm-touch); justify-content: center; }
+.avttm-item-row > .avttm-item-details { flex: 1 0 100%; margin: 0 0 0.2em; }
+.avttm-item-list, .avttm-skill-list, .avttm-comp-results, .avttm-inventory-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3em; }
+.avttm-item-list button, .avttm-skill-list button, .avttm-comp-results button {
+  width: 100%; display: flex; gap: 0.6em; align-items: center; text-align: left;
+}
+.avttm-item-list img, .avttm-comp-results img { width: 2em; height: 2em; border: none; flex: none; }
+.avttm-item-list span, .avttm-skill-list span, .avttm-comp-results span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-item-list em, .avttm-skill-list em, .avttm-comp-results em { color: var(--avttm-muted); font-size: 0.85em; font-style: normal; }
+.avttm-comp-results i { width: 1.4em; text-align: center; flex: none; }
+.avttm-skill-list button.proficient span::before,
+.avttm-ability button.proficient::before { content: "● "; color: var(--avttm-accent); }
+.avttm-ability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5em; }
+.avttm-ability { display: flex; flex-direction: column; gap: 0.3em; padding: 0.4em; border: 1px solid var(--avttm-border); border-radius: 0.6em; text-align: center; }
+.avttm-ability-abbr { color: var(--avttm-muted); font-size: 0.8em; }
+.avttm-ability-score { font-size: 1.4em; font-weight: bold; }
+.avttm-ability button { padding-inline: 0.2em; font-size: 0.85em; }
+.avttm-condition-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.3em; }
+.avttm-condition-grid button { display: flex; gap: 0.4em; align-items: center; text-align: left; font-size: 0.9em; }
+.avttm-condition-grid img { width: 1.4em; height: 1.4em; border: none; }
+
+/* Inventory */
+.avttm-currency-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.3em; }
+.avttm-coin { display: flex; flex-direction: column; align-items: center; gap: 0.15em; font-size: 0.8em; }
+.avttm-coin img { width: 1.6em; height: 1.6em; border: none; }
+.avttm-coin input { width: 100%; text-align: center; padding-inline: 0.1em !important; }
+.avttm-meter { height: 0.5em; margin-top: 0.4em; border-radius: 0.25em; background: linear-gradient(to right, var(--avttm-accent) var(--pct), rgba(255, 255, 255, 0.1) var(--pct)); }
+.avttm-meter.over { background: linear-gradient(to right, var(--avttm-danger) var(--pct), rgba(255, 255, 255, 0.1) var(--pct)); }
+.avttm-inv-contents { margin: 0.3em 0 0 1em; }
+.avttm-inv-row { display: flex; gap: 0.3em; align-items: center; }
+.avttm-inv-name { flex: 1; min-width: 0; display: flex; gap: 0.5em; align-items: center; text-align: left; padding-inline: 0.4em !important; }
+.avttm-inv-name img { width: 1.8em; height: 1.8em; border: none; flex: none; }
+.avttm-inv-name span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-inv-name em { color: var(--avttm-muted); font-size: 0.85em; font-style: normal; }
+.avttm-inv-qty { display: flex; align-items: center; gap: 0.2em; flex: none; }
+.avttm-inv-qty span { min-width: 1.6em; text-align: center; }
+.avttm-inv-qty button, .avttm-inv-row > button:not(.avttm-inv-name) { min-width: var(--avttm-touch); padding-inline: 0 !important; }
+.avttm-inv-details { margin: 0.3em 0; padding: 0.5em; font-size: 0.9em; background: rgba(0, 0, 0, 0.3); border-radius: 0.5em; }
+.avttm-inv-details img { max-width: 100%; }
+
+/* Journal and compendium */
+.avttm-comp-search { display: flex; gap: 0.4em; }
+.avttm-comp-search input { flex: 1; min-width: 0; }
+.avttm-comp-search button { flex: none; min-width: var(--avttm-touch); }
+.avttm-comp-crumbs { display: flex; flex-wrap: wrap; gap: 0.3em; align-items: center; }
+.avttm-comp-crumbs span { color: var(--avttm-muted); }
+.avttm-comp-more { align-self: center; }
+.avttm-comp-entry h3, .avttm-journal-entry h3 { display: flex; gap: 0.5em; align-items: center; margin: 0.4em 0; }
+.avttm-comp-entry h3 img { width: 2.2em; height: 2.2em; border: none; }
+.avttm-comp-content, .avttm-journal-content { line-height: 1.5; margin: 0; }
+.avttm-comp-content img, .avttm-journal-content img { max-width: 100%; height: auto; border: none; }
+.avttm-journal-content figcaption { color: var(--avttm-muted); font-size: 0.85em; text-align: center; }
+.avttm-journal-pages { display: flex; gap: 0.3em; overflow-x: auto; margin-bottom: 0.4em; }
+.avttm-journal-pages button { flex: none; }
+.avttm-group { margin: 0; }
+
+/* Chat: the log scrolls, the composer stays at the bottom of the view. */
+.avttm-view[data-view="chat"] { overflow: hidden; padding: 0; }
+.avttm-chat { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.avttm-chat-filter { flex: none; margin: 0 0 0.4em; }
+.avttm-chat-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0;
+  padding: 0.6em;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+.avttm-chat-log > .chat-message { margin: 0; }
+/* Foundry's own message styling (dark text for a light card) is all other systems get: dnd5e restyles messages for the
+   dark theme, SotDL doesn't, so its rolls and cards came out dark on dark. They get the light card core intends. */
+body:not([data-avtt-system="dnd5e"]) .avttm-chat-log .chat-message {
+  background: #ebe6da; color: #191813; border-color: #6f6c66;
+}
+body:not([data-avtt-system="dnd5e"]) .avttm-chat-log .chat-message .message-header { color: #4b4a44; }
+.avttm-chat-more { align-self: center; }
+.avttm-chat-form {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  padding: 0.5em 0.6em;
+  background: var(--avttm-panel);
+  border-top: 1px solid var(--avttm-border);
+}
+.avttm-chat-mode-label { margin: 0; }
+.avttm-chat-compose { display: flex; gap: 0.4em; align-items: stretch; }
+.avttm-chat-compose textarea { flex: 1; min-width: 0; resize: none; }
+.avttm-chat-compose button { flex: none; min-width: var(--avttm-touch); }
+
+/* Dice */
+.avttm-dice-mode, .avttm-dice-roller { display: flex; flex-direction: column; gap: 0.6em; }
+.avttm-dice-mode h2, .avttm-dice-roller h2 { margin: 0; }
+.avttm-dice-mode p { margin: 0; }
+/* Dice pool: two per row, each − label + (touch-sized). */
+.avttm-dice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4em; }
+.avttm-die {
+  display: flex; align-items: center; gap: 0.3em;
+  padding: 0.25em; border: 1px solid var(--avttm-border); border-radius: 0.6em;
+}
+.avttm-die.active { border-color: var(--avttm-accent); }
+.avttm-die-label { flex: 1; display: flex; gap: 0.3em; align-items: baseline; justify-content: center; }
+.avttm-die-label em { font-style: normal; font-size: 0.85em; color: var(--avttm-muted); }
+.avttm-die.active .avttm-die-label em { color: var(--avttm-accent); }
+#avttm-app .avttm-die button { min-width: var(--avttm-touch); padding-inline: 0 !important; font-weight: bold; }
+/* Sections of the dice roller, divided by a line with a little padding. */
+.avttm-dice-roller > * + * { border-top: 1px solid var(--avttm-border); padding-top: 0.6em; }
+.avttm-dice-mod { display: flex; gap: 0.5em; align-items: center; }
+.avttm-dice-mod span { flex: 1; text-align: center; }
+.avttm-dice-formula {
+  padding: 0.6em; text-align: center; font-family: monospace; font-size: 1.1em;
+  background: rgba(0, 0, 0, 0.35); border-radius: 0.5em;
+}
+
+/* Roll result notice: at the bottom, just above the character pill; tap to dismiss. Its button (Roll damage) below it. */
+.avttm-toast-box {
+  position: fixed;
+  bottom: calc(var(--avttm-tabbar-height) + var(--avttm-pill-height, 0px) + 0.6em);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  max-width: calc(100vw - 2em);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+  pointer-events: none;
+}
+.avttm-toast-box > button { pointer-events: auto; }
+.avttm-toast {
+  max-width: 100%;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  /* Core gives buttons a fixed height (--button-size); the two lines need more. */
+  height: auto;
+  padding: 0.6em 2.4em 0.6em 1.2em !important;
+  border-radius: 1em !important;
+  box-shadow: 0 0.4em 1.2em rgba(0, 0, 0, 0.6);
+  animation: avttm-toast-in 200ms ease-out;
+}
+.avttm-toast[hidden] { display: none !important; }
+.avttm-toast-text { font-size: 1.4em; font-weight: bold; }
+.avttm-toast-detail { font-size: 0.85em; opacity: 0.85; }
+.avttm-toast-close { position: absolute; top: 50%; right: 0.9em; transform: translateY(-50%); opacity: 0.8; }
+.avttm-toast-damage { background: var(--avttm-danger) !important; border-color: var(--avttm-danger) !important; color: #fff !important; }
+.avttm-toast-healing { background: var(--avttm-hp) !important; border-color: var(--avttm-hp) !important; color: #111 !important; }
+/* Any other roll: the app's panel colour with an accent border. */
+.avttm-toast-roll { background: var(--avttm-panel) !important; border-color: var(--avttm-accent) !important; color: var(--avttm-text) !important; }
+.avttm-toast-action {
+  width: auto;
+  height: auto;
+  min-height: 2.6em;
+  padding: 0 1.4em !important;
+  border-radius: 999px !important;
+  background: var(--avttm-danger) !important;
+  border-color: var(--avttm-danger) !important;
+  color: #fff !important;
+  font-weight: bold;
+  box-shadow: 0 0.4em 1.2em rgba(0, 0, 0, 0.6);
+  animation: avttm-toast-in 200ms ease-out;
+}
+.avttm-toast-action[hidden] { display: none !important; }
+@keyframes avttm-toast-in { from { opacity: 0; transform: translateY(0.6em); } }
+@media (prefers-reduced-motion: reduce) { .avttm-toast, .avttm-toast-action { animation: none; } }
+
+/* Use dialog (bottom sheet): activity → targets → roll options */
+.avttm-sheet-panel.avttm-use { gap: 0.6em; }
+/* Specific enough to beat ".avttm-sheet-panel > * { flex-shrink: 0 }": the body must shrink so the button stays visible. */
+.avttm-sheet-panel > .avttm-use-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.avttm-use-body > * { flex-shrink: 0; }
+.avttm-use header h3 { display: flex; gap: 0.5em; align-items: center; min-width: 0; }
+.avttm-use header h3 img { width: 1.8em; height: 1.8em; border: none; flex: none; }
+.avttm-use header h3 span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-use-step { margin: 0; }
+.avttm-use-field { display: flex; flex-direction: column; gap: 0.3em; }
+.avttm-use-field > span { font-weight: bold; }
+.avttm-use-previous { text-align: left; }
+.avttm-use-check { display: flex; gap: 0.8em; align-items: center; justify-content: space-between; min-height: var(--avttm-touch); }
+.avttm-use-check > span { font-weight: bold; }
+#avttm-app .avttm-use-check input[type="checkbox"] { width: 1.6em; height: 1.6em; margin: 0; accent-color: var(--avttm-accent); flex: none; }
+.avttm-sheet-panel > .avttm-use-footer { flex: none; padding-top: 0.2em; background: var(--avttm-panel); }
+
+/* Settings */
+.avttm-settings { display: flex; flex-direction: column; gap: 0.6em; }
+.avttm-settings legend { font-weight: bold; padding: 0 0.3em; }
+.avttm-settings .form-group { display: flex; flex-direction: column; align-items: stretch; gap: 0.3em; margin: 0; }
+.avttm-settings .form-group > label { font-weight: bold; }
+.avttm-settings .form-fields { display: flex; gap: 0.4em; align-items: center; }
+.avttm-settings .form-fields > * { flex: 1; }
+/* On/off settings: the name on the left, the checkbox on the right, the hint below. */
+.avttm-settings .form-group:has(input[type="checkbox"]) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 0.8em;
+}
+.avttm-settings .form-group:has(input[type="checkbox"]) > .hint { grid-column: 1 / -1; }
+.avttm-settings .form-fields:has(input[type="checkbox"]) { flex: none; }
+#avttm-app .avttm-settings input[type="checkbox"] {
+  flex: none;
+  width: 1.6em;
+  height: 1.6em;
+  margin: 0;
+  accent-color: var(--avttm-accent);
+}
+.avttm-settings range-picker { flex: 1; }
+.avttm-settings .hint { margin: 0; color: var(--avttm-muted); font-size: 0.85em; }
+
+/* Targets panel (bottom sheet) */
+/* Bottom sheets (character switcher, use dialog) end above the tab bar, which sits in a higher layer and would
+   otherwise cover their lower part. The header stays put and the list scrolls. */
+.avttm-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: var(--avttm-tabbar-height); z-index: 60;
+  display: flex; align-items: flex-end;
+  /* Dims everything behind the sheet; tapping it closes the sheet. */
+  background: rgba(0, 0, 0, 0.72);
+}
+.avttm-sheet-panel {
+  width: 100%;
+  max-height: calc(100% - 2em);
+  display: flex;
+  flex-direction: column;
+  padding: 0.8em;
+  background: var(--avttm-panel);
+  border-radius: 1em 1em 0 0;
+  border-top: 1px solid var(--avttm-border);
+  box-shadow: 0 -0.6em 1.6em rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.avttm-sheet-panel > * { flex-shrink: 0; }
+.avttm-sheet-panel > .avttm-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.avttm-sheet-panel header { display: flex; gap: 0.5em; align-items: center; margin-bottom: 0.3em; }
+.avttm-sheet-panel h3 { flex: 1; margin: 0; }
+.avttm-targets button i { flex: none; }
+.avttm-targets .avttm-disposition--1 img { outline: 2px solid var(--avttm-danger); }
+.avttm-targets .avttm-disposition-1 img { outline: 2px solid var(--avttm-hp); }
+
+/* ---------- Foundry windows on the phone ---------- */
+
+/* Every window fills the screen; its position is forced, so dragging has no effect. */
+body.avttm-phone .application.avttm-window,
+body.avttm-phone .app.avttm-window {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: calc(100dvh - var(--avttm-tabbar-height)) !important;
+  max-width: none !important;
+  max-height: none !important;
+  transform: none !important;
+  border-radius: 0 !important;
+  padding-top: env(safe-area-inset-top);
+  box-sizing: border-box;
+}
+/* Small dialogs slide up from the bottom instead, resting on the tab bar. */
+body.avttm-phone .application.avttm-window.avttm-dialog {
+  top: auto !important;
+  bottom: var(--avttm-tabbar-height) !important;
+  height: auto !important;
+  max-height: calc(90dvh - var(--avttm-tabbar-height)) !important;
+  border-radius: 1em 1em 0 0 !important;
+}
+body.avttm-phone .avttm-window .window-header { min-height: var(--avttm-touch); font-size: 16px; }
+body.avttm-phone .avttm-window .window-header .header-control { min-width: var(--avttm-touch); min-height: var(--avttm-touch); }
+body.avttm-phone .avttm-window .window-resize-handle { display: none; }
+body.avttm-phone .avttm-window .window-content { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+body.avttm-phone .avttm-window input,
+body.avttm-phone .avttm-window select,
+body.avttm-phone .avttm-window textarea { font-size: 16px; } /* no iOS auto-zoom */
+
+/* ---------- Spells tab ---------- */
+
+.avttm-spell-always { flex: none; min-width: 44px; text-align: center; color: var(--avttm-accent, #c9a227); }
+.avttm-spell-name { flex: 1; min-width: 0; display: flex; gap: 0.5em; align-items: center; min-height: 44px; padding: 0 0.6em; }
+.avttm-spell-name img { width: 1.8em; height: 1.8em; border: none; flex: none; }
+.avttm-spell-unavailable .avttm-spell-name { opacity: 0.6; }
+/* Spell rows: the name and, right under it, small component marks, together no taller than the icon (2em). */
+.avttm-item-list .avttm-spell-text { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 0.1em; overflow: hidden; white-space: normal; }
+.avttm-item-list .avttm-spell-title { flex: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.15; }
+.avttm-item-list .avttm-spell-tags { flex: none; display: flex; gap: 0.25em; overflow: visible; }
+.avttm-item-list .avttm-spell-tag {
+  font-style: normal; font-size: 0.6em; font-weight: bold; line-height: 1.2;
+  padding: 0 0.4em; border: 1px solid currentColor; border-radius: 0.6em; opacity: 0.75; color: inherit;
+}
+
+/* ---------- Party view (shared inventory module) ---------- */
+
+.avttm-view.avtsi-panel { --avtsi-accent: var(--avttm-accent); --avtsi-ink: #111; }
+
+/* Quick actions: tabs at the bottom of the sheet, sharing its width; rest buttons side by side. */
+.avttm-launcher-tabs { margin-top: 0.4em; }
+.avttm-launcher-tabs button { flex: 1 0 auto; }
+.avttm-launcher-rest { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4em; }
+.avttm-launcher-rest button { min-height: calc(var(--avttm-touch) * 1.5); }
+
+/* Favorites: the pill's star shows a row of them below it (the pill wraps); it scrolls sideways when long. */
+.avttm-top { flex-wrap: wrap; }
+/* The portrait as the favorites toggle: no button chrome, a small star badge at its corner. */
+#avttm-app .avttm-pill-portrait, #avttm-app .avttm-pill-portrait.active {
+  position: relative; flex: none;
+  padding: 0 !important; min-height: 0; height: auto; width: auto;
+  background: none; border: none; border-radius: 50%;
+}
+.avttm-pill-portrait-star {
+  position: absolute; right: -0.15em; bottom: -0.15em;
+  padding: 0.2em; font-size: 0.75em;
+  background: var(--avttm-panel); border: 1px solid var(--avttm-border); border-radius: 50%;
+  color: var(--avttm-muted);
+}
+.avttm-pill-portrait.active .avttm-pill-portrait-star { color: gold; border-color: gold; }
+.avttm-pill-favorites {
+  flex: 1 0 100%;
+  display: flex; gap: 0.4em; align-items: center;
+  overflow-x: auto; scrollbar-width: none;
+  padding-top: 0.5em;
+  border-top: 1px solid var(--avttm-border);
+}
+.avttm-pill-favorites::-webkit-scrollbar { display: none; }
+.avttm-pill-favorites button { flex: none; display: flex; gap: 0.4em; align-items: center; max-width: 11em; }
+.avttm-pill-favorites img { width: 1.8em; height: 1.8em; border: none; flex: none; }
+.avttm-pill-favorites span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The favorite star on sheet rows. */
+#avttm-app .avttm-favorite.active { background: var(--avttm-raised); border-color: gold; color: gold; }
+
+/* SotDL: the fast / slow turn choice in the combat strip. */
+.avttm-turn-speed { flex: none; }
+#avttm-app .avttm-turn-speed button.selected { background: var(--avttm-accent); border-color: var(--avttm-accent); color: #111; font-weight: bold; }

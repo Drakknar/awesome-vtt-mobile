@@ -1,0 +1,29 @@
+<div class="avttm-chat">
+  <div class="avttm-segmented avttm-chat-filter" role="radiogroup" aria-label="{{localize 'AVTTM.Chat.Filter.Label'}}">
+    {{#each filters}}
+    <button type="button" data-action="chatFilter" data-filter="{{id}}" role="radio" class="{{#if active}}selected{{/if}}"
+            aria-checked="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+    {{/each}}
+  </div>
+  <ol class="avttm-chat-log chat-log plain themed theme-dark" aria-live="polite">
+    {{#if hasMore}}<li class="avttm-chat-more"><button type="button" data-action="chatMore">{{localize "AVTTM.Chat.Earlier"}}</button></li>{{/if}}
+  </ol>
+  <form class="avttm-chat-form" autocomplete="off">
+    <div class="avttm-segmented avttm-chat-modes" role="radiogroup" aria-label="{{localize 'AVTTM.Chat.Mode'}}">
+      {{#each modes}}
+      <button type="button" data-action="chatMode" data-mode="{{id}}" role="radio" class="{{#if active}}selected{{/if}}"
+              aria-checked="{{#if active}}true{{else}}false{{/if}}" aria-label="{{label}}">
+        <i class="{{icon}}" inert></i>
+      </button>
+      {{/each}}
+    </div>
+    <p class="avttm-muted avttm-small avttm-chat-mode-label">{{modeLabel}}</p>
+    <div class="avttm-chat-compose">
+      <textarea name="chatText" rows="2" maxlength="{{maxLength}}" placeholder="{{localize 'AVTTM.Chat.Placeholder'}}"
+                aria-label="{{localize 'AVTTM.Chat.Placeholder'}}">{{text}}</textarea>
+      <button type="button" data-action="chatSend" class="avttm-primary" aria-label="{{localize 'AVTTM.Chat.Send'}}">
+        <i class="fa-solid fa-paper-plane" inert></i>
+      </button>
+    </div>
+  </form>
+</div>

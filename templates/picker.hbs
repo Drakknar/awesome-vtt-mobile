@@ -1,0 +1,15 @@
+<div class="avttm-sheet-panel" role="dialog" aria-modal="true" aria-label="{{localize 'AVTTM.Character.Switch'}}">
+  <header>
+    <h3>{{localize "AVTTM.Character.Switch"}}</h3>
+    <button type="button" data-action="closeOverlay" aria-label="{{localize 'AVTTM.Close'}}"><i class="fa-solid fa-xmark" inert></i></button>
+  </header>
+  <ul class="avttm-list">
+    {{#each characters}}
+    <li>
+      <button type="button" data-action="pickActor" data-actor-id="{{id}}" class="{{#if current}}active{{/if}}" aria-pressed="{{#if current}}true{{else}}false{{/if}}">
+        <img src="{{img}}" alt=""><span>{{name}}</span>{{#if current}}<i class="fa-solid fa-check" inert></i>{{/if}}
+      </button>
+    </li>
+    {{/each}}
+  </ul>
+</div>

@@ -1,0 +1,49 @@
+{{#if actor}}
+{{#if canFavorite}}
+{{!-- The portrait shows or hides the favorites row (a small star marks it), so the pill needs no extra button. --}}
+<button type="button" data-action="toggleFavorites" class="avttm-pill-portrait {{#if favoritesOpen}}active{{/if}}"
+        aria-expanded="{{#if favoritesOpen}}true{{else}}false{{/if}}" aria-label="{{localize 'AVTTM.Pill.Favorites'}}">
+  <img class="avttm-top-portrait {{#if actor.dying}}dying{{/if}}" src="{{actor.img}}" alt="">
+  <i class="{{#if favoritesOpen}}fa-solid{{else}}fa-regular{{/if}} fa-star avttm-pill-portrait-star" inert></i>
+</button>
+{{else}}
+<img class="avttm-top-portrait {{#if actor.dying}}dying{{/if}}" src="{{actor.img}}" alt="">
+{{/if}}
+<div class="avttm-top-info">
+  <div class="avttm-top-name">
+    <strong>{{actor.name}}</strong>
+    <span class="avttm-muted">{{localize "AVTTM.Sheet.Level"}} {{actor.level}}{{#if actor.classes}} · {{actor.classes}}{{/if}}</span>
+  </div>
+  <div class="avttm-hp-bar small" style="--hp-pct: {{actor.hp.pct}}%"><span>{{actor.hp.value}} / {{actor.hp.max}}{{#if actor.hp.temp}} <em>+{{actor.hp.temp}}</em>{{/if}}</span></div>
+  <div class="avttm-top-stats">
+    {{#each actor.stats}}
+    <span aria-label="{{label}} {{value}}"><i class="fa-solid {{icon}}" inert></i> {{value}}</span>
+    {{/each}}
+    {{#if actor.inspiration}}<span class="avttm-inspired" aria-label="{{actor.inspirationLabel}}"><i class="fa-solid fa-star" inert></i></span>{{/if}}
+    {{#if rollMode}}
+    <button type="button" data-action="view" data-view="dice" class="avttm-roll-chip avttm-roll-{{rollMode.tone}}" aria-label="{{rollMode.label}}">{{rollMode.short}}</button>
+    {{/if}}
+  </div>
+</div>
+<button type="button" data-action="toggleLauncher" class="avttm-pill-launcher {{#if launcherOpen}}active{{/if}}"
+        aria-expanded="{{#if launcherOpen}}true{{else}}false{{/if}}" aria-label="{{localize 'AVTTM.Launcher.Title'}}">
+  <i class="fa-solid {{#if launcherOpen}}fa-xmark{{else}}fa-bolt{{/if}}" inert></i>
+</button>
+{{#if canSwitch}}
+<button type="button" data-action="openPicker" class="avttm-pill-switch" aria-label="{{localize 'AVTTM.Character.Switch'}}">
+  <i class="fa-solid fa-chevron-up" inert></i>
+</button>
+{{/if}}
+{{#if canFavorite}}{{#if favoritesOpen}}
+{{!-- Favorites: a row of its own below the pill, one tap to use; starred in the Character tab. --}}
+<div class="avttm-pill-favorites" role="toolbar" aria-label="{{localize 'AVTTM.Pill.Favorites'}}">
+  {{#each favorites}}
+  <button type="button" data-action="useItem" data-item-id="{{id}}"><img src="{{img}}" alt=""><span>{{name}}</span></button>
+  {{else}}
+  <span class="avttm-muted avttm-small"><i class="fa-regular fa-star" inert></i> {{localize "AVTTM.Pill.FavoritesHint"}}</span>
+  {{/each}}
+</div>
+{{/if}}{{/if}}
+{{else}}
+<div class="avttm-top-info"><strong>{{world}}</strong></div>
+{{/if}}

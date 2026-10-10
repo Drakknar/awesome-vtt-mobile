@@ -1,0 +1,45 @@
+<section class="avttm-card avttm-dice-mode">
+  <h2>{{localize "AVTTM.Dice.NextRoll"}}</h2>
+  <div class="avttm-segmented avttm-adv" role="radiogroup" aria-label="{{localize 'AVTTM.Dice.NextRoll'}}">
+    {{#each advModes}}
+    <button type="button" data-action="advMode" data-mode="{{id}}" role="radio" class="{{#if active}}selected{{/if}} avttm-adv-{{tone}}"
+            aria-checked="{{#if active}}true{{else}}false{{/if}}" aria-label="{{label}}">{{text}}</button>
+    {{/each}}
+  </div>
+  <p class="avttm-muted avttm-small">{{localize "AVTTM.Dice.NextRollHint"}}</p>
+</section>
+
+<section class="avttm-card avttm-dice-roller">
+  <h2>{{localize "AVTTM.Dice.Roller"}}</h2>
+  {{#if physicalAvailable}}
+  <div class="avttm-segmented" role="radiogroup" aria-label="{{localize 'AVTTM.Dice.Source'}}">
+    <button type="button" data-action="diceSource" data-source="physical" role="radio" class="{{#if physical}}selected{{/if}}"
+            aria-checked="{{#if physical}}true{{else}}false{{/if}}"><i class="fa-solid fa-hand" inert></i> {{localize "AVTTM.Dice.Physical"}}</button>
+    <button type="button" data-action="diceSource" data-source="digital" role="radio" class="{{#unless physical}}selected{{/unless}}"
+            aria-checked="{{#if physical}}false{{else}}true{{/if}}"><i class="fa-solid fa-computer" inert></i> {{localize "AVTTM.Dice.Digital"}}</button>
+  </div>
+  {{/if}}
+  <div class="avttm-dice-grid">
+    {{#each dice}}
+    <div class="avttm-die {{#if count}}active{{/if}}">
+      <button type="button" data-action="diceRemove" data-die="{{die}}" {{#unless count}}disabled{{/unless}}
+              aria-label="{{localize 'AVTTM.Dice.RemoveOne' die=die}}">−</button>
+      <span class="avttm-die-label"><strong>{{die}}</strong>{{#if count}}<em>×{{count}}</em>{{/if}}</span>
+      <button type="button" data-action="diceAdd" data-die="{{die}}" aria-label="{{localize 'AVTTM.Dice.AddOne' die=die}}">+</button>
+    </div>
+    {{/each}}
+  </div>
+  <div class="avttm-dice-mod">
+    <button type="button" data-action="diceMod" data-delta="-1" aria-label="{{localize 'AVTTM.Dice.Minus'}}">−1</button>
+    <span>{{localize "AVTTM.Dice.Modifier"}} {{mod}}</span>
+    <button type="button" data-action="diceMod" data-delta="1" aria-label="{{localize 'AVTTM.Dice.Plus'}}">+1</button>
+  </div>
+  <div class="avttm-dice-formula">{{#if formula}}{{formula}}{{else}}<span class="avttm-muted">{{localize "AVTTM.Dice.Empty"}}</span>{{/if}}</div>
+  <div class="avttm-button-row">
+    <button type="button" data-action="diceClear">{{localize "AVTTM.Dice.Clear"}}</button>
+    <button type="button" data-action="diceRoll" class="avttm-primary" {{#unless formula}}disabled{{/unless}}>
+      {{#if physical}}<i class="fa-solid fa-keyboard" inert></i> {{localize "AVTTM.Dice.EnterResults"}}
+      {{else}}<i class="fa-solid fa-dice" inert></i> {{localize "AVTTM.Dice.Roll"}}{{/if}}
+    </button>
+  </div>
+</section>

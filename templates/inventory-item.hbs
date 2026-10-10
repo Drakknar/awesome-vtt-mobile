@@ -1,0 +1,49 @@
+<li class="avttm-inv-item" data-item-id="{{id}}">
+  <div class="avttm-inv-row">
+    <button type="button" data-action="invDetails" data-item-id="{{id}}" class="avttm-inv-name {{#if (lookup @root.state.inv.details id)}}active{{/if}}">
+      <img src="{{img}}" alt=""><span>{{name}}</span>{{#if uses}}<em>{{uses}}</em>{{/if}}
+    </button>
+    <div class="avttm-inv-qty">
+      <button type="button" data-action="invQty" data-item-id="{{id}}" data-delta="-1" aria-label="{{localize 'AVTTM.Inventory.Less'}}">−</button>
+      <span>{{quantity}}</span>
+      <button type="button" data-action="invQty" data-item-id="{{id}}" data-delta="1" aria-label="{{localize 'AVTTM.Inventory.More'}}">+</button>
+    </div>
+    {{#if equippable}}
+    <button type="button" data-action="invEquip" data-item-id="{{id}}" class="{{#if equipped}}active{{/if}}"
+            aria-label="{{localize 'AVTTM.Inventory.Equipped'}}" aria-pressed="{{#if equipped}}true{{else}}false{{/if}}">
+      <i class="fa-solid fa-shield-halved" inert></i>
+    </button>
+    {{/if}}
+    {{#if attunable}}
+    <button type="button" data-action="invAttune" data-item-id="{{id}}" class="{{#if attuned}}active{{/if}}"
+            aria-label="{{localize 'AVTTM.Inventory.Attuned'}}" aria-pressed="{{#if attuned}}true{{else}}false{{/if}}">
+      <i class="fa-solid fa-sun" inert></i>
+    </button>
+    {{/if}}
+    {{#if @root.canFavorite}}
+    <button type="button" data-action="toggleFavorite" data-item-id="{{id}}" class="avttm-favorite {{#if favorite}}active{{/if}}"
+            aria-label="{{#if favorite}}{{localize 'AVTTM.Sheet.Unfavorite' name=name}}{{else}}{{localize 'AVTTM.Sheet.Favorite' name=name}}{{/if}}"
+            aria-pressed="{{#if favorite}}true{{else}}false{{/if}}">
+      <i class="{{#if favorite}}fa-solid{{else}}fa-regular{{/if}} fa-star" inert></i>
+    </button>
+    {{/if}}
+    {{#if @root.toParty}}
+    <button type="button" data-action="invToParty" data-item-id="{{id}}" aria-label="{{localize 'AVTTM.Inventory.ToParty'}}">
+      <i class="fa-solid fa-sack-dollar" inert></i>
+    </button>
+    {{/if}}
+    {{#if usable}}
+    <button type="button" data-action="useItem" data-item-id="{{id}}" aria-label="{{localize 'AVTTM.Inventory.Use'}}">
+      <i class="fa-solid fa-hand-sparkles" inert></i>
+    </button>
+    {{/if}}
+  </div>
+  {{#with (lookup @root.state.inv.details id) as |html|}}
+  <div class="avttm-inv-details">{{{html}}}</div>
+  {{/with}}
+  {{#if contents.length}}
+  <ul class="avttm-inventory-list avttm-inv-contents">
+    {{#each contents}}{{> "modules/awesome-vtt-mobile/templates/inventory-item.hbs"}}{{/each}}
+  </ul>
+  {{/if}}
+</li>

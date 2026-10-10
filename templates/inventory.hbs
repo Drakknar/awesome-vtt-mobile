@@ -1,0 +1,32 @@
+<section class="avttm-group avttm-currency">
+  <h4>{{localize "AVTTM.Inventory.Currency"}}
+    {{#if encumbrance}}<span class="avttm-slots">{{localize "AVTTM.Inventory.Weight"}} {{encumbrance.value}}/{{encumbrance.max}}</span>{{/if}}
+  </h4>
+  <div class="avttm-currency-row">
+    {{#each currency}}
+    <label class="avttm-coin">
+      {{#if icon}}<img src="{{icon}}" alt="">{{/if}}
+      <input type="number" name="currency.{{key}}" value="{{value}}" min="0" max="9999999" step="1" inputmode="numeric"
+             aria-label="{{label}}">
+      <span>{{abbr}}</span>
+    </label>
+    {{/each}}
+  </div>
+  {{#if encumbrance}}
+  <div class="avttm-meter {{#if encumbrance.encumbered}}over{{/if}}" style="--pct: {{encumbrance.pct}}%"></div>
+  {{/if}}
+  {{#if attunement}}
+  <p class="avttm-muted">{{localize "AVTTM.Inventory.Attunement"}} {{attunement.value}}/{{attunement.max}}</p>
+  {{/if}}
+</section>
+
+{{#each groups}}
+<section class="avttm-group">
+  <h4>{{label}}</h4>
+  <ul class="avttm-inventory-list">
+    {{#each items}}{{> "modules/awesome-vtt-mobile/templates/inventory-item.hbs"}}{{/each}}
+  </ul>
+</section>
+{{else}}
+<p class="avttm-muted">{{localize "AVTTM.Inventory.Empty"}}</p>
+{{/each}}
