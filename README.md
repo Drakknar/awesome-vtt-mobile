@@ -2,7 +2,7 @@
 
 A Foundry VTT module for players sitting at the table: each player logs in on their own phone and gets their character, chat, journals and compendium in a phone layout. The map is not shown.
 
-- **Targets:** Foundry VTT v14 and dnd5e 6.0.x (built against 6.0.5).
+- **Targets:** Foundry VTT v14 and dnd5e 6.0.x (built against 6.0.5, verified with 6.0.6).
 - **Works without the table module.** It needs only the shared library [`awesome-vtt-core`](../awesome-vtt-core), and adds physical dice entry when [Awesome VTT](../awesome-vtt) is also active.
 - **Input:** touch-first, with buttons at least 44 px tall.
 
