@@ -40,3 +40,16 @@ Sister module: `../awesome-vtt` (table mode).
 - **Foundry v14 source:** the core zips are in `/Volumes/appdata/foundry-vtt/data/container_cache/`. Read the real API there. The zip's `node_modules/handlebars` can precompile templates.
 - **dnd5e source:** `../../systems/dnd5e/dnd5e.mjs`.
 - **Checks after edits:** `node --check`, template precompile, and JSON validation for `lang/en.json` and `module.json`. Keep the README in step with features.
+
+## Upstream watch
+
+`.github/workflows/compat-review.yml` runs daily and has Claude review this module once for each new version of a dependency, following `.github/prompts/foundry-compat.md`.
+- **Game systems:** a release of a system in `relationships.systems` newer than its `verified` version.
+- **Foundry core:** a new Stable build, with a light review within the verified generation and a full review for a new generation.
+- **Results:**
+  - The module is fine: a pull request that bumps `verified`. It goes out with the next manual release.
+  - A fix: a pull request.
+  - Anything that needs the owner: an issue labelled `upstream-watch` and assigned to the owner.
+  - New features worth using: an `enhancement` issue.
+- **Access:** Claude works with read-only access (secret `CLAUDE_CODE_OAUTH_TOKEN`). A separate job opens the pull request and issues.
+- **Bookkeeping:** `.github/scripts/watch.sh` records what was reviewed on the `watch-state` branch. Run the workflow by hand with `force` to review again.
