@@ -1,6 +1,6 @@
 # awesome-vtt-mobile – project notes
 
-Phone companion for Foundry VTT **v14** and **dnd5e 6.0.x** (built against 6.0.5), by Stefano Pignataro.
+Phone companion for Foundry VTT **v14** and **dnd5e 6.0.x** (built against 6.0.5, verified with 6.0.6), by Stefano Pignataro.
 Sister module: `../awesome-vtt` (table mode).
 
 ## What it is
