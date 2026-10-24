@@ -7,7 +7,7 @@
             aria-checked="{{#if active}}true{{else}}false{{/if}}" aria-label="{{label}}">{{text}}</button>
     {{/each}}
   </div>
-  {{#if advScale}}<div class="avttm-adv-scale" aria-hidden="true"><span class="avttm-adv-scale-low"><i class="fa-solid fa-arrow-left" inert></i> {{advScale.low}}</span><span class="avttm-adv-scale-high">{{advScale.high}} <i class="fa-solid fa-arrow-right" inert></i></span></div>{{/if}}
+  {{#if advScale}}{{> avttmAdvScale advScale}}{{/if}}
   <p class="avttm-muted avttm-small">{{#if advScale}}{{localize "AVTTM.Dice.NextRollHintBoons"}}{{else}}{{localize "AVTTM.Dice.NextRollHint"}}{{/if}}</p>
 </section>
 
