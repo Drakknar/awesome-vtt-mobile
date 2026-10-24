@@ -931,9 +931,11 @@ export default class PhoneApp {
     if ( CompendiumPanel.ACTIONS.has(action) ) return this.compendium.handle(action, target);
     if ( JournalPanel.ACTIONS.has(action) ) return this.journal.handle(action, target);
     if ( DicePanel.ACTIONS.has(action) ) return this.dice.handle(action, target.dataset);
-    // SotDL: an attribute asks for boons or banes first (per-browser setting), in a prompt preset to the Next roll.
+    // SotDL: an attribute asks for boons or banes first (per-browser setting), in a prompt preset to the Next roll;
+    // an attribute the prompt can't name rolls straight away below.
     if ( (action === "rollAbility") && sys.FEATURES.abilityRollPrompt && getSetting("askBoons") ) {
-      return this.prompts.add(abilityRollPrompt(this.actor, target.dataset.ability));
+      const prompt = abilityRollPrompt(this.actor, target.dataset.ability);
+      if ( prompt ) return this.prompts.add(prompt);
     }
     if ( sheet.D20_ACTIONS.has(action) ) return this.#d20(mode => sheet.runSheetAction(this.actor, action, target.dataset, mode));
     if ( sheet.SHEET_ACTIONS.has(action) ) {
