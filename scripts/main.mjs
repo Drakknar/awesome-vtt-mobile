@@ -1,6 +1,6 @@
 import { MODULE_ID } from "./constants.mjs";
 import { registerSettings, getSetting } from "./settings.mjs";
-import { isPhoneMode, maybeAskPhoneMode, applyCanvasPreference, onPhoneModeChanged, dismissPhoneNotices, markLoaded } from "./mode.mjs";
+import { isPhoneMode, maybeAskPhoneMode, applyCanvasPreference, onPhoneModeChanged, dismissPhoneNotices, markLoaded, applyPhoneLink } from "./mode.mjs";
 import { registerWindowAdapter } from "./windows.mjs";
 import { installHomeScreenTags } from "./pwa.mjs";
 import { setKeepAwake } from "../../awesome-vtt-core/scripts/wake-lock.mjs";
@@ -29,6 +29,7 @@ Hooks.once("init", () => {
   markSystem();
   registerSettings();
   registerCoreSettings();
+  applyPhoneLink();
   foundry.applications.handlebars.loadTemplates([
     `modules/${MODULE_ID}/templates/inventory.hbs`,
     `modules/${MODULE_ID}/templates/inventory-item.hbs`,

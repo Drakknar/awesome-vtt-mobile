@@ -23,8 +23,31 @@ function looksLikePhone(info = deviceInfo()) {
 /** Delay before asking whether to use phone mode (ms). */
 const ASK_DELAY_MS = 1500;
 
+/** Phone mode asked for by the page address (`?phone=on|off`), used until the setting has been saved. */
+let linkMode = null;
+
 /** Is the phone app shown on this device? "auto" becomes "on" or "off" once the user has answered. */
-export const isPhoneMode = () => getSetting("phoneMode") === "on";
+export const isPhoneMode = () => (linkMode ?? getSetting("phoneMode")) === "on";
+
+/**
+ * A `?phone=on|off` link (the SSO join page's "Join" / "Join on phone" buttons) sets phone mode for this device and
+ * counts as the answer to the phone-mode question. Call it at init: `isPhoneMode()` follows the link at once, while
+ * the settings are saved in the background. The parameter is removed from the address, so a later reload keeps
+ * whatever the user picks in the settings.
+ */
+export function applyPhoneLink() {
+  const url = new URL(window.location.href);
+  const value = url.searchParams.get("phone");
+  if ( value === null ) return;
+  url.searchParams.delete("phone");
+  window.history.replaceState(window.history.state, "", url);
+  if ( !["on", "off"].includes(value) ) return;
+  linkMode = value;
+  (async () => {
+    await setSetting("asked", true);
+    if ( getSetting("phoneMode") !== value ) await setSetting("phoneMode", value);
+  })().catch(err => console.error("awesome-vtt-mobile | Couldn't save phone mode from the link", err));
+}
 
 /** Whether the phone app was started for this page load; a change of phone mode reloads the page. */
 let activeAtLoad = false;
@@ -86,6 +109,8 @@ function reload() {
 
 /** Switching phone mode on or off rebuilds the whole interface, so the page is reloaded when it changes. */
 export async function onPhoneModeChanged() {
+  // A change before "ready" comes from applyPhoneLink; the page is built for it already.
+  if ( !game.ready ) return;
   if ( await applyCanvasPreference() ) return;
   if ( isPhoneMode() !== activeAtLoad ) reload();
 }

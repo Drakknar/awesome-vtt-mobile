@@ -21,6 +21,7 @@ Also:
 3. The player opens Foundry on their phone and logs in. On a phone-sized touch screen, the module asks once whether to use phone mode. Answering yes turns the map off on that phone and reloads the page.
    - **Detection:** a phone or small tablet is recognised by a small screen plus either a mobile browser or a touch-only pointer. The browser console (`awesome-vtt-mobile | Phone check`) shows what was detected.
    - **If it isn't offered:** open Game Settings → Configure Settings → Awesome VTT – Phone Companion, and set **Phone mode** to **On**. The page reloads into phone mode.
+   - **From a link:** opening `/game?phone=on` (or `?phone=off`) sets phone mode for that device without asking, and the parameter is then removed from the address. A custom join page can use this for "Join on phone" and "Join" buttons.
 
 ## What the phone shows
 
