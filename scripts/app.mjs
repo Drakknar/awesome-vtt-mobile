@@ -2,9 +2,9 @@ import { MODULE_ID, views } from "./constants.mjs";
 import { getSetting, setSetting } from "./settings.mjs";
 import sys from "../../awesome-vtt-core/scripts/system.mjs";
 import { CompendiumPanel, JournalPanel } from "../../awesome-vtt-core/scripts/panels.mjs";
-import { DicePanel, advModes, advModeChoices, advModeShort, advModeTone } from "../../awesome-vtt-core/scripts/dice.mjs";
+import { DicePanel, advModes, advModeChoices, advModeScale, advModeShort, advModeTone } from "../../awesome-vtt-core/scripts/dice.mjs";
 import * as sheet from "../../awesome-vtt-core/scripts/sheet.mjs";
-import { PromptQueue } from "../../awesome-vtt-core/scripts/prompts.mjs";
+import { PromptQueue, abilityRollPrompt } from "../../awesome-vtt-core/scripts/prompts.mjs";
 import * as coreUI from "../../awesome-vtt-core/scripts/ui.mjs";
 import * as targets from "./targets.mjs";
 import * as use from "./use.mjs";
@@ -742,6 +742,7 @@ export default class PhoneApp {
         mastery: mark(options.mastery, u.mastery)
       };
       context.modes = this.#advModes(u.mode);
+      context.scale = advModeScale();
       context.bonus = u.bonus;
     }
     return context;
@@ -869,7 +870,7 @@ export default class PhoneApp {
   /* -------------------------------------------- */
 
   async renderDice() {
-    this.#view("dice").innerHTML = await renderTemplate(tpl("dice"), { ...this.dice.context(), advModes: this.#advModes() });
+    this.#view("dice").innerHTML = await renderTemplate(tpl("dice"), { ...this.dice.context(), advModes: this.#advModes(), advScale: advModeScale() });
   }
 
   /** The Normal / Advantage / Disadvantage choice (Dice view, prompts, attack options). */
@@ -930,6 +931,10 @@ export default class PhoneApp {
     if ( CompendiumPanel.ACTIONS.has(action) ) return this.compendium.handle(action, target);
     if ( JournalPanel.ACTIONS.has(action) ) return this.journal.handle(action, target);
     if ( DicePanel.ACTIONS.has(action) ) return this.dice.handle(action, target.dataset);
+    // SotDL: an attribute asks for boons or banes first (per-browser setting), in a prompt preset to the Next roll.
+    if ( (action === "rollAbility") && sys.FEATURES.abilityRollPrompt && getSetting("askBoons") ) {
+      return this.prompts.add(abilityRollPrompt(this.actor, target.dataset.ability));
+    }
     if ( sheet.D20_ACTIONS.has(action) ) return this.#d20(mode => sheet.runSheetAction(this.actor, action, target.dataset, mode));
     if ( sheet.SHEET_ACTIONS.has(action) ) {
       return sheet.runSheetAction(this.actor, action, target.dataset, "normal", { toggled: this.state.toggledEffects });

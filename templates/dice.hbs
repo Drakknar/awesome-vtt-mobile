@@ -1,12 +1,14 @@
 <section class="avttm-card avttm-dice-mode">
-  <h2>{{localize "AVTTM.Dice.NextRoll"}}</h2>
+  {{!-- SotDL: boons and banes, with the scale's two ends named under the choices. --}}
+  <h2>{{#if advScale}}{{advScale.title}}{{else}}{{localize "AVTTM.Dice.NextRoll"}}{{/if}}</h2>
   <div class="avttm-segmented avttm-adv" role="radiogroup" aria-label="{{localize 'AVTTM.Dice.NextRoll'}}">
     {{#each advModes}}
     <button type="button" data-action="advMode" data-mode="{{id}}" role="radio" class="{{#if active}}selected{{/if}} avttm-adv-{{tone}}"
             aria-checked="{{#if active}}true{{else}}false{{/if}}" aria-label="{{label}}">{{text}}</button>
     {{/each}}
   </div>
-  <p class="avttm-muted avttm-small">{{localize "AVTTM.Dice.NextRollHint"}}</p>
+  {{#if advScale}}<div class="avttm-adv-scale" aria-hidden="true"><span class="avttm-adv-scale-low"><i class="fa-solid fa-arrow-left" inert></i> {{advScale.low}}</span><span class="avttm-adv-scale-high">{{advScale.high}} <i class="fa-solid fa-arrow-right" inert></i></span></div>{{/if}}
+  <p class="avttm-muted avttm-small">{{#if advScale}}{{localize "AVTTM.Dice.NextRollHintBoons"}}{{else}}{{localize "AVTTM.Dice.NextRollHint"}}{{/if}}</p>
 </section>
 
 <section class="avttm-card avttm-dice-roller">

@@ -48,6 +48,9 @@ export function registerSettings() {
   client("turnAlertSoundPath", new StringField({ blank: true, initial: "" }));
   client("turnAlertVolume", new NumberField({ initial: 0.8, min: 0, max: 1, step: 0.05 }));
 
+  // SotDL: an attribute rolled from the sheet asks for boons or banes first (only listed in SotDL worlds).
+  client("askBoons", new BooleanField({ initial: true }), { config: game.system.id === "demonlord" });
+
   // Damage / healing result notice.
   client("rollToasts", new BooleanField({ initial: true }));
 
