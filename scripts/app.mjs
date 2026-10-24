@@ -14,6 +14,21 @@ import { physicalDiceActive } from "./dice.mjs";
 import { renderSettingsView, homeScreenHelp } from "./views/settings-view.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
+
+/**
+ * A tab bar that scrolls sideways (more tabs than fit, e.g. SotDL's six sheet tabs) is drawn again with each render:
+ * put back where it was scrolled to, then bring the chosen tab into view, so a tap doesn't jump back to the start.
+ */
+function keepTabsInView(root, scrollLeft) {
+  const bar = root.querySelector(".avttm-subtabs");
+  if ( !bar ) return;
+  bar.scrollLeft = scrollLeft;
+  const active = bar.querySelector("button.active");
+  if ( !active ) return;
+  const left = active.offsetLeft - bar.offsetLeft;
+  if ( left < bar.scrollLeft ) bar.scrollLeft = left;
+  else if ( (left + active.offsetWidth) > (bar.scrollLeft + bar.clientWidth) ) bar.scrollLeft = left + active.offsetWidth - bar.clientWidth;
+}
 const tpl = name => `modules/${MODULE_ID}/templates/${name}.hbs`;
 
 /** Chat messages shown at first, and added by each "Show earlier messages". */
@@ -424,7 +439,9 @@ export default class PhoneApp {
     const tab = context.tab;
     const scroll = view.querySelector(".avttm-sheet-body")?.scrollTop ?? 0;
     const sameTab = this.#lastSheetTab === tab;
+    const tabsScroll = view.querySelector(".avttm-subtabs")?.scrollLeft ?? 0;
     view.innerHTML = await renderTemplate(tpl("character"), context);
+    keepTabsInView(view, tabsScroll);
     // Keep the list's scroll position across data updates (a new section starts at the top).
     const body = view.querySelector(".avttm-sheet-body");
     if ( body && sameTab ) body.scrollTop = scroll;
@@ -463,7 +480,9 @@ export default class PhoneApp {
       if ( !actor ) return this.#setOverlay(null);
       // A typed damage/heal amount survives data updates.
       const amount = overlay.querySelector('input[name="hpAmount"]')?.value ?? "";
+      const tabsScroll = overlay.querySelector(".avttm-subtabs")?.scrollLeft ?? 0;
       overlay.innerHTML = await renderTemplate(tpl("launcher"), this.#launcherContext(actor));
+      keepTabsInView(overlay, tabsScroll);
       const input = overlay.querySelector('input[name="hpAmount"]');
       if ( input ) input.value = amount;
     }
