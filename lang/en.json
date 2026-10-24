@@ -213,6 +213,10 @@
         "Name": "Prompt for GM requests",
         "Hint": "When the GM asks the party to rest or to make a group check or save (D&D 5e), or asks you for a challenge roll (Shadow of the Demon Lord), ask you to take part straight away."
       },
+      "askBoons": {
+        "Name": "Ask for boons and banes",
+        "Hint": "Shadow of the Demon Lord: rolling an attribute from the sheet first asks how many boons or banes the roll gets, preset to the Next roll choice."
+      },
       "autoInitiative": {
         "Name": "Prompt to roll initiative",
         "Hint": "When your character joins an encounter without initiative, ask you to roll it (in Shadow of the Demon Lord: to choose a fast or slow turn)."
@@ -240,6 +244,7 @@
     "Dice": {
       "NextRoll": "Next roll",
       "NextRollHint": "Applies to your next d20 roll (checks, saves, skills, attacks, or a d20 below), then goes back to Normal. While it's armed, the pill shows ADV or DIS.",
+      "NextRollHintBoons": "Banes (−) on the left, boons (+) on the right. Applies to your next roll (attributes, attacks, spells, or a d20 below), then goes back to 0. While it's armed, the pill shows the number of boons or banes.",
       "Roller": "Roll dice",
       "Source": "Dice source",
       "Physical": "Real dice",
