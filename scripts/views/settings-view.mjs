@@ -7,7 +7,7 @@ import { canPromptInstall, isStandalone, isIOS } from "../pwa.mjs";
 const SECTIONS = [
   { label: "AVTTM.SettingsView.Phone", keys: ["phoneMode", "disableMap", "keepAwake"] },
   { label: "AVTTM.SettingsView.Turn", keys: ["turnAlert", "turnAlertNext", "turnAlertVibrate", "turnAlertSound", "turnAlertSoundPath", "turnAlertVolume"] },
-  { label: "AVTTM.SettingsView.Automation", keys: ["rollToasts", "autoDamage", "autoDeathSaves", "autoConcentration", "autoSaves", "autoRequests", "autoInitiative"] },
+  { label: "AVTTM.SettingsView.Automation", keys: ["askBoons", "rollToasts", "autoDamage", "autoDeathSaves", "autoConcentration", "autoSaves", "autoRequests", "autoInitiative"] },
   { label: "AVTTM.SettingsView.Dice", keys: ["physicalDice"] },
   { label: "AVTTM.SettingsView.GM", keys: ["targetList", "homeScreen"] }
 ];
@@ -36,7 +36,8 @@ export function renderSettingsView(container, actor) {
     fieldset.append(legend);
     for ( const key of section.keys ) {
       const setting = game.settings.settings.get(`${MODULE_ID}.${key}`);
-      if ( !setting || ((setting.scope === CONST.SETTING_SCOPES.WORLD) && !canWorld) ) continue;
+      // Settings hidden from the settings window (e.g. askBoons outside SotDL) are left out here too.
+      if ( !setting?.config || ((setting.scope === CONST.SETTING_SCOPES.WORLD) && !canWorld) ) continue;
       const group = setting.type.toFormGroup(
         { label: game.i18n.localize(setting.name), hint: game.i18n.localize(setting.hint), localize: true },
         { name: key, value: game.settings.get(MODULE_ID, key), localize: true }

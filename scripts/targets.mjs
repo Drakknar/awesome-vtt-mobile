@@ -1,7 +1,7 @@
 import { MODULE_ID } from "./constants.mjs";
 import { getSetting } from "./settings.mjs";
 import { targetOnSelect } from "../../awesome-vtt-core/scripts/demonlord.mjs";
-import { visibleTokenIds } from "../../awesome-vtt-core/scripts/vision.mjs";
+import { visibleTokenIds, MAX_IDS } from "../../awesome-vtt-core/scripts/vision.mjs";
 
 /**
  * Targeting without the map.
@@ -51,6 +51,13 @@ let vision = { key: null, ids: null, state: "off", at: 0, asking: false };
 
 const visionKey = (scene, actor) => `${scene.id}:${actor.id}`;
 
+/** The table screen's user (Awesome VTT's world setting), if that module is active and the user is logged in. */
+function tableScreenUser() {
+  if ( !game.modules.get("awesome-vtt")?.active ) return null;
+  const id = game.settings.settings.has("awesome-vtt.tableUser") ? game.settings.get("awesome-vtt", "tableUser") : null;
+  return (id && game.users.get(id)?.active && (id !== game.user.id)) ? id : null;
+}
+
 /**
  * Where the check of what `actor` can see stands for the target list: "off" (the scene doesn't use token vision),
  * "checking", "known" or "unknown" (no device could tell). Starts a new check when the last answer is stale.
@@ -61,12 +68,21 @@ export function checkVision(actor) {
   const key = visionKey(scene, actor);
   const same = vision.key === key;
   if ( same && (vision.asking || ((Date.now() - vision.at) < VISION_FRESH_MS)) ) return vision.state;
+  // No map here and no table screen online: nothing to wait for (e.g. a world played with phones only).
+  const answerer = tableScreenUser();
+  if ( !canvas?.ready && !answerer ) {
+    vision = { key, ids: null, asked: null, state: "unknown", at: Date.now(), asking: false };
+    return vision.state;
+  }
   // A first question shows "checking"; a refresh keeps the last answer until the new one comes.
-  vision = same ? { ...vision, asking: true } : { key, ids: null, state: "checking", at: 0, asking: true };
+  vision = same ? { ...vision, asking: true } : { key, ids: null, asked: null, state: "checking", at: 0, asking: true };
   const tokenIds = scene.tokens.filter(t => !t.hidden && t.actor).map(t => t.id);
-  visibleTokenIds(actor, scene.id, tokenIds).then(ids => {
+  visibleTokenIds(actor, scene.id, tokenIds, { answerer }).then(ids => {
     if ( vision.key !== key ) return;
-    vision = { key, ids: ids ? new Set(ids) : null, state: ids ? "known" : "unknown", at: Date.now(), asking: false };
+    vision = {
+      key, ids: ids ? new Set(ids) : null, asked: new Set(tokenIds.slice(0, MAX_IDS)), state: ids ? "known" : "unknown",
+      at: Date.now(), asking: false
+    };
     listeners.forEach(fn => fn());
   });
   return vision.state;
@@ -83,7 +99,8 @@ export function getCandidates(actor) {
   let tokens = scene.tokens.filter(t => !t.hidden && t.actor);
   if ( actor && scene.tokenVision && (vision.key === visionKey(scene, actor)) ) {
     if ( vision.state === "checking" ) return [];
-    if ( vision.ids ) tokens = tokens.filter(t => vision.ids.has(t.id));
+    // A token placed after the answer (or beyond what one question covers) stays listed until the next check.
+    if ( vision.ids ) tokens = tokens.filter(t => vision.ids.has(t.id) || !vision.asked?.has(t.id));
   }
   if ( getSetting("targetList") === "combat" ) {
     const combat = game.combats.find(c => c.active && (c.scene?.id === scene.id));
@@ -245,9 +262,12 @@ export function initTargets() {
   Hooks.on("deleteToken", token => {
     if ( selected.delete(token.id) ) { broadcast(); changed(); }
   });
+  // A token that moves, appears or is revealed may change what the character sees: the next look asks again.
+  const visionStale = () => { vision.at = 0; };
   Hooks.on("updateToken", (token, change) => {
+    if ( ["x", "y", "elevation", "hidden", "level"].some(k => k in change) ) visionStale();
     if ( change.hidden && selected.delete(token.id) ) { broadcast(); changed(); }
     else if ( token.parent?.id === targetScene()?.id ) changed();
   });
-  Hooks.on("createToken", () => changed());
+  Hooks.on("createToken", () => { visionStale(); changed(); });
 }

@@ -14,6 +14,21 @@ import { physicalDiceActive } from "./dice.mjs";
 import { renderSettingsView, homeScreenHelp } from "./views/settings-view.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
+
+/**
+ * A tab bar that scrolls sideways (more tabs than fit, e.g. SotDL's six sheet tabs) is drawn again with each render:
+ * put back where it was scrolled to, then bring the chosen tab into view, so a tap doesn't jump back to the start.
+ */
+function keepTabsInView(root, scrollLeft) {
+  const bar = root.querySelector(".avttm-subtabs");
+  if ( !bar ) return;
+  bar.scrollLeft = scrollLeft;
+  const active = bar.querySelector("button.active");
+  if ( !active ) return;
+  const left = active.offsetLeft - bar.offsetLeft;
+  if ( left < bar.scrollLeft ) bar.scrollLeft = left;
+  else if ( (left + active.offsetWidth) > (bar.scrollLeft + bar.clientWidth) ) bar.scrollLeft = left + active.offsetWidth - bar.clientWidth;
+}
 const tpl = name => `modules/${MODULE_ID}/templates/${name}.hbs`;
 
 /** Chat messages shown at first, and added by each "Show earlier messages". */
@@ -102,6 +117,7 @@ export default class PhoneApp {
   }
 
   #lastSheetTab = null;
+  #sheetDraw = 0;
 
   /* -------------------------------------------- */
   /*  Character                                   */
@@ -411,6 +427,8 @@ export default class PhoneApp {
   async renderCharacter() {
     const view = this.#view("character");
     const actor = this.actor;
+    // Only the latest render draws: an older one that finishes later (e.g. the Bio tab's enrichment) is dropped.
+    const draw = ++this.#sheetDraw;
     if ( !actor ) {
       // "picking" is explicit: an empty list is falsy in Handlebars and would skip the "no character" message.
       view.innerHTML = await renderTemplate(tpl("character"), {
@@ -421,10 +439,14 @@ export default class PhoneApp {
     }
     const context = { ...sheet.sheetContext(actor, this.state.sheetTab, id => `AVTTM.Sheet.Tab.${id}`), state: this.state };
     await sheet.enrichSheet(context, actor);
+    const html = await renderTemplate(tpl("character"), context);
+    if ( draw !== this.#sheetDraw ) return;
     const tab = context.tab;
     const scroll = view.querySelector(".avttm-sheet-body")?.scrollTop ?? 0;
     const sameTab = this.#lastSheetTab === tab;
-    view.innerHTML = await renderTemplate(tpl("character"), context);
+    const tabsScroll = view.querySelector(".avttm-subtabs")?.scrollLeft ?? 0;
+    view.innerHTML = html;
+    keepTabsInView(view, tabsScroll);
     // Keep the list's scroll position across data updates (a new section starts at the top).
     const body = view.querySelector(".avttm-sheet-body");
     if ( body && sameTab ) body.scrollTop = scroll;
@@ -463,7 +485,9 @@ export default class PhoneApp {
       if ( !actor ) return this.#setOverlay(null);
       // A typed damage/heal amount survives data updates.
       const amount = overlay.querySelector('input[name="hpAmount"]')?.value ?? "";
+      const tabsScroll = overlay.querySelector(".avttm-subtabs")?.scrollLeft ?? 0;
       overlay.innerHTML = await renderTemplate(tpl("launcher"), this.#launcherContext(actor));
+      keepTabsInView(overlay, tabsScroll);
       const input = overlay.querySelector('input[name="hpAmount"]');
       if ( input ) input.value = amount;
     }
@@ -698,9 +722,11 @@ export default class PhoneApp {
     else if ( u.step === "targets" ) {
       const count = activity ? use.targetCount(activity) : null;
       const allies = activity ? use.prefersAllies(activity) : false;
-      // On a scene with token vision, only what the character can see (asked of the table screen).
-      const vision = targets.checkVision(this.actor);
-      const list = targets.getCandidates(this.actor).map(t => ({ ...t, selected: u.selected.includes(t.id) }));
+      // Using an action on a scene with token vision: only what the character can see (asked of the table screen).
+      // A chat card's targets (damage, healing on whoever the spell reached) aren't limited.
+      const seer = u.resolve ? null : this.actor;
+      const vision = seer ? targets.checkVision(seer) : "off";
+      const list = targets.getCandidates(seer).map(t => ({ ...t, selected: u.selected.includes(t.id) }));
       context.checking = vision === "checking";
       // A creature picked earlier that the character can no longer see isn't targeted.
       if ( !context.checking ) u.selected = u.selected.filter(id => list.some(t => t.id === id));
@@ -784,7 +810,7 @@ export default class PhoneApp {
   #usePrevious() {
     const u = this.state.use;
     if ( !u ) return;
-    const candidates = new Set(targets.getCandidates(this.actor).map(t => t.id));
+    const candidates = new Set(targets.getCandidates(u.resolve ? null : this.actor).map(t => t.id));
     u.selected = targets.selectedIds().filter(id => candidates.has(id));
     return this.#useNext();
   }
@@ -944,6 +970,8 @@ export default class PhoneApp {
     // an attribute the prompt can't name rolls straight away below.
     if ( (action === "rollAbility") && sys.FEATURES.abilityRollPrompt && getSetting("askBoons") ) {
       const prompt = abilityRollPrompt(this.actor, target.dataset.ability);
+      // A second tap on the same attribute while its prompt is up doesn't queue another roll.
+      if ( prompt && this.prompts.has(p => p.local && (p.actor === prompt.actor) && (p.attribute === prompt.attribute)) ) return;
       if ( prompt ) return this.prompts.add(prompt);
     }
     if ( sheet.D20_ACTIONS.has(action) ) return this.#d20(mode => sheet.runSheetAction(this.actor, action, target.dataset, mode));
