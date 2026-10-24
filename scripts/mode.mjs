@@ -61,7 +61,7 @@ export async function maybeAskPhoneMode() {
   const info = deviceInfo();
   const phone = looksLikePhone(info);
   console.info("awesome-vtt-mobile | Phone check", { ...info, phone, phoneMode: getSetting("phoneMode"), asked: getSetting("asked") });
-  if ( (getSetting("phoneMode") !== "auto") || getSetting("asked") || !phone ) return false;
+  if ( linkMode || (getSetting("phoneMode") !== "auto") || getSetting("asked") || !phone ) return false;
   // Other modules often open welcome windows on "ready"; ask a moment later so this question opens after them.
   await new Promise(resolve => window.setTimeout(resolve, ASK_DELAY_MS));
   const yes = await foundry.applications.api.DialogV2.confirm({
