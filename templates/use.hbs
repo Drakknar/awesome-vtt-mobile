@@ -131,7 +131,8 @@
 
   {{#unless (eq step "activity")}}
   <footer class="avttm-use-footer">
-    <button type="button" data-action="useNext" class="avttm-primary avttm-wide">
+    {{!-- Not while the target list waits for what the character can see (a tap would attack with no target). --}}
+    <button type="button" data-action="useNext" class="avttm-primary avttm-wide" {{#if checking}}disabled{{/if}}>
       {{#if last}}<i class="fa-solid fa-hand-sparkles" inert></i> {{confirm}}
       {{else}}{{localize "AVTTM.Use.Next"}} <i class="fa-solid fa-chevron-right" inert></i>{{/if}}
     </button>
