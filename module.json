@@ -2,10 +2,10 @@
   "id": "awesome-vtt-mobile",
   "title": "Awesome VTT – Phone Companion",
   "description": "A phone view for players at the table: character, chat, journals, compendium, targets and turn alerts, without the map.",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "url": "https://github.com/Drakknar/awesome-vtt-mobile",
   "manifest": "https://github.com/Drakknar/awesome-vtt-mobile/releases/latest/download/module.json",
-  "download": "https://github.com/Drakknar/awesome-vtt-mobile/releases/download/v0.11.1/module.zip",
+  "download": "https://github.com/Drakknar/awesome-vtt-mobile/releases/download/v0.11.2/module.zip",
   "authors": [
     {
       "name": "Stefano Pignataro"
@@ -55,7 +55,7 @@
         "manifest": "https://github.com/Drakknar/awesome-vtt-core/releases/latest/download/module.json",
         "reason": "Shared code (dnd5e data, rolls and checks, sheet, quick actions, prompts, dice pool, compendium and journal panels, chat helpers).",
         "compatibility": {
-          "minimum": "0.14.1"
+          "minimum": "0.14.2"
         }
       }
     ]
