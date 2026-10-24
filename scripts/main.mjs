@@ -36,6 +36,8 @@ Hooks.once("init", () => {
   ]);
   // A spell's component marks, a named partial ({{> avttmSpellTags}}) for both spell row variants.
   foundry.applications.handlebars.loadTemplates({ avttmSpellTags: `modules/${MODULE_ID}/templates/spell-tags.hbs` });
+  // SotDL's "Banes … Boons" line under the Next roll choice ({{> avttmAdvScale}}): Dice view, prompts, attack options.
+  foundry.applications.handlebars.loadTemplates({ avttmAdvScale: `modules/${MODULE_ID}/templates/adv-scale.hbs` });
   // Hide Foundry's desktop interface as early as possible on a phone.
   if ( isPhoneMode() ) {
     document.body.classList.add("avttm-phone");
