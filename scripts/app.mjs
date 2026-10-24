@@ -4,7 +4,7 @@ import sys from "../../awesome-vtt-core/scripts/system.mjs";
 import { CompendiumPanel, JournalPanel } from "../../awesome-vtt-core/scripts/panels.mjs";
 import { DicePanel, advModes, advModeChoices, advModeScale, advModeShort, advModeTone } from "../../awesome-vtt-core/scripts/dice.mjs";
 import * as sheet from "../../awesome-vtt-core/scripts/sheet.mjs";
-import { PromptQueue, askAbilityRoll } from "../../awesome-vtt-core/scripts/prompts.mjs";
+import { PromptQueue, askSheetRoll } from "../../awesome-vtt-core/scripts/prompts.mjs";
 import * as coreUI from "../../awesome-vtt-core/scripts/ui.mjs";
 import * as targets from "./targets.mjs";
 import * as use from "./use.mjs";
@@ -967,8 +967,9 @@ export default class PhoneApp {
     if ( CompendiumPanel.ACTIONS.has(action) ) return this.compendium.handle(action, target);
     if ( JournalPanel.ACTIONS.has(action) ) return this.journal.handle(action, target);
     if ( DicePanel.ACTIONS.has(action) ) return this.dice.handle(action, target.dataset);
-    // SotDL: an attribute asks for boons or banes first (per-browser setting), in a prompt preset to the Next roll.
-    if ( (action === "rollAbility") && getSetting("askBoons") && askAbilityRoll(this.prompts, this.actor, target.dataset.ability) ) return;
+    // A check, save or skill (SotDL: an attribute) asks for advantage or boons first (per-browser setting), in a prompt
+    // preset to the Next roll.
+    if ( sheet.D20_ACTIONS.has(action) && getSetting("askBoons") && askSheetRoll(this.prompts, this.actor, action, target.dataset) ) return;
     if ( sheet.D20_ACTIONS.has(action) ) return this.#d20(mode => sheet.runSheetAction(this.actor, action, target.dataset, mode));
     if ( sheet.SHEET_ACTIONS.has(action) ) {
       return sheet.runSheetAction(this.actor, action, target.dataset, "normal", { toggled: this.state.toggledEffects });
