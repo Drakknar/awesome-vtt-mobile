@@ -36,7 +36,8 @@
         "spells": "Spells",
         "abilities": "Abilities",
         "inventory": "Inventory",
-        "status": "Status"
+        "status": "Status",
+        "bio": "Bio"
       },
       "Slots": "Slots",
       "NoActions": "Nothing to use.",
@@ -54,7 +55,8 @@
       "UseMore": "One use more",
       "About": "What {name} does",
       "Favorite": "Add {name} to favorites",
-      "Unfavorite": "Remove {name} from favorites"
+      "Unfavorite": "Remove {name} from favorites",
+      "NoBio": "No description yet."
     },
     "Inventory": {
       "Currency": "Currency",
@@ -94,7 +96,9 @@
         "Empty": "This folder is empty.",
         "More": "Show more",
         "None": "No compendiums available.",
-        "Search": "Search"
+        "Search": "Search",
+        "Add": "Add to inventory",
+        "Added": "Added to {name}'s inventory ({count})."
       }
     },
     "Combat": {
@@ -111,7 +115,12 @@
     "Targets": {
       "None": "No tokens to target in the active scene.",
       "Unknown": "Unknown creature",
-      "Note": "Without the map, line of sight isn't checked. Your targets are shown to the GM and on the table screen."
+      "Vision": {
+        "off": "This scene doesn't use vision, so every creature is listed. Your targets are shown to the GM and on the table screen.",
+        "checking": "Checking what {name} can see…",
+        "known": "Only the creatures {name} can see, as on the table screen. Your targets are shown to the GM and on the table screen.",
+        "unknown": "Couldn't check what {name} can see (the table screen isn't open), so every creature is listed. Your targets are shown to the GM and on the table screen."
+      }
     },
     "SettingsView": {
       "Phone": "This device",

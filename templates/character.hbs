@@ -105,6 +105,19 @@
   </ul>
   {{/if}}
 
+  {{#if bio}}
+  {{!-- SotDL: ancestry, paths, professions, languages, religion, appearance and the description (read-only). --}}
+  <section class="avttm-group avttm-bio">
+    {{#if bio.facts.length}}<dl class="avttm-bio-list">{{#each bio.facts}}<dt>{{label}}</dt><dd>{{value}}</dd>{{/each}}</dl>{{/if}}
+    {{#if bio.appearance.length}}
+    <h4>{{bio.appearanceLabel}}</h4>
+    <dl class="avttm-bio-list">{{#each bio.appearance}}<dt>{{label}}</dt><dd>{{value}}</dd>{{/each}}</dl>
+    {{/if}}
+    <h4>{{bio.descriptionLabel}}</h4>
+    {{#if bio.html}}<div class="avttm-bio-text">{{{bio.html}}}</div>{{else}}<p class="avttm-muted">{{localize "AVTTM.Sheet.NoBio"}}</p>{{/if}}
+  </section>
+  {{/if}}
+
   {{#if status}}
   <section class="avttm-group">
     <h4>{{localize "AVTTM.Sheet.Conditions"}}</h4>

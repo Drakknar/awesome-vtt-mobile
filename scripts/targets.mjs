@@ -1,6 +1,7 @@
 import { MODULE_ID } from "./constants.mjs";
 import { getSetting } from "./settings.mjs";
 import { targetOnSelect } from "../../awesome-vtt-core/scripts/demonlord.mjs";
+import { visibleTokenIds } from "../../awesome-vtt-core/scripts/vision.mjs";
 
 /**
  * Targeting without the map.
@@ -13,6 +14,9 @@ import { targetOnSelect } from "../../awesome-vtt-core/scripts/demonlord.mjs";
  *   The system also reads `canvas.tokens` and `game.user.targets` itself (talents, gear, chat card buttons), which
  *   don't exist without the map: installDemonlordBridge() gives it a stand-in serving the phone's targets.
  * - The targets are broadcast as the user's activity, so the table screen and the GM see them on their maps.
+ * - Vision: on a scene with token vision, the use dialog lists only the creatures the character can see. The phone
+ *   has no map to tell, so it asks the table screen (core vision.mjs); if nobody answers, every creature is listed
+ *   and the dialog says so.
  */
 
 const { HOVER, ALWAYS } = CONST.TOKEN_DISPLAY_MODES;
@@ -36,11 +40,51 @@ const targetScene = () => game.scenes.active ?? null;
 
 export const targetsEnabled = () => getSetting("targetList") !== "off";
 
-/** Tokens the user may target, with names hidden the way the token's nameplate setting hides them. */
-export function getCandidates() {
+/** How long an answer about what a character can see is used before asking again (ms). */
+const VISION_FRESH_MS = 5000;
+
+/**
+ * The last answer: for which scene and character, the visible token ids (null if unknown), its state, when it came,
+ * and whether a newer one is being asked for (the last answer stays in use meanwhile, so the list doesn't flicker).
+ */
+let vision = { key: null, ids: null, state: "off", at: 0, asking: false };
+
+const visionKey = (scene, actor) => `${scene.id}:${actor.id}`;
+
+/**
+ * Where the check of what `actor` can see stands for the target list: "off" (the scene doesn't use token vision),
+ * "checking", "known" or "unknown" (no device could tell). Starts a new check when the last answer is stale.
+ */
+export function checkVision(actor) {
+  const scene = targetScene();
+  if ( !scene || !actor || !scene.tokenVision ) return "off";
+  const key = visionKey(scene, actor);
+  const same = vision.key === key;
+  if ( same && (vision.asking || ((Date.now() - vision.at) < VISION_FRESH_MS)) ) return vision.state;
+  // A first question shows "checking"; a refresh keeps the last answer until the new one comes.
+  vision = same ? { ...vision, asking: true } : { key, ids: null, state: "checking", at: 0, asking: true };
+  const tokenIds = scene.tokens.filter(t => !t.hidden && t.actor).map(t => t.id);
+  visibleTokenIds(actor, scene.id, tokenIds).then(ids => {
+    if ( vision.key !== key ) return;
+    vision = { key, ids: ids ? new Set(ids) : null, state: ids ? "known" : "unknown", at: Date.now(), asking: false };
+    listeners.forEach(fn => fn());
+  });
+  return vision.state;
+}
+
+/**
+ * Tokens the user may target, with names hidden the way the token's nameplate setting hides them.
+ * @param {Actor} [actor]  The character using an action: only what it can see (see checkVision), nothing while
+ *   that is being checked. Without it, every creature.
+ */
+export function getCandidates(actor) {
   const scene = targetScene();
   if ( !scene || !targetsEnabled() ) return [];
   let tokens = scene.tokens.filter(t => !t.hidden && t.actor);
+  if ( actor && scene.tokenVision && (vision.key === visionKey(scene, actor)) ) {
+    if ( vision.state === "checking" ) return [];
+    if ( vision.ids ) tokens = tokens.filter(t => vision.ids.has(t.id));
+  }
   if ( getSetting("targetList") === "combat" ) {
     const combat = game.combats.find(c => c.active && (c.scene?.id === scene.id));
     const inCombat = new Set(combat?.combatants.map(c => c.tokenId) ?? []);

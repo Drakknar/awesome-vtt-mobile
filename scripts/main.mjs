@@ -13,6 +13,7 @@ import { initTurnAlert } from "./turn-alert.mjs";
 import { syncPhoneDice } from "./dice.mjs";
 import sys, { isSupported, markSystem } from "../../awesome-vtt-core/scripts/system.mjs";
 import PhoneApp from "./app.mjs";
+import { registerCoreSettings } from "../../awesome-vtt-core/scripts/settings.mjs";
 import { closeStartupUserConfig, onActorDataChange, onChatChange, actorOf } from "../../awesome-vtt-core/scripts/ui.mjs";
 
 /** Setting of each automation prompt kind (see the core's prompts.mjs). */
@@ -27,6 +28,7 @@ let app = null;
 Hooks.once("init", () => {
   markSystem();
   registerSettings();
+  registerCoreSettings();
   foundry.applications.handlebars.loadTemplates([
     `modules/${MODULE_ID}/templates/inventory.hbs`,
     `modules/${MODULE_ID}/templates/inventory-item.hbs`,

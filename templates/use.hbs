@@ -82,10 +82,10 @@
       </button>
     </li>
     {{else}}
-    <li class="avttm-muted">{{localize "AVTTM.Targets.None"}}</li>
+    <li class="avttm-muted">{{#if checking}}<i class="fa-solid fa-spinner fa-spin" inert></i> {{targetNote}}{{else}}{{localize "AVTTM.Targets.None"}}{{/if}}</li>
     {{/each}}
   </ul>
-  <p class="avttm-muted avttm-small">{{localize "AVTTM.Targets.Note"}}</p>
+  {{#unless checking}}<p class="avttm-muted avttm-small">{{targetNote}}</p>{{/unless}}
   {{/if}}
 
   {{#if (eq step "options")}}

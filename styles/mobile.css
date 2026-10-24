@@ -436,6 +436,11 @@ body.avttm-phone #ui-right { display: none !important; }
 .avttm-comp-more { align-self: center; }
 .avttm-comp-entry h3, .avttm-journal-entry h3 { display: flex; gap: 0.5em; align-items: center; margin: 0.4em 0; }
 .avttm-comp-entry h3 img { width: 2.2em; height: 2.2em; border: none; }
+/* SotDL Bio tab: label / value rows, then the description. */
+.avttm-bio-list { display: grid; grid-template-columns: auto 1fr; gap: 0.25em 0.8em; margin: 0.2em 0 0.6em; }
+.avttm-bio-list dt { color: var(--avttm-muted); }
+.avttm-bio-list dd { margin: 0; }
+.avttm-bio-text p { margin: 0.4em 0; }
 .avttm-comp-content, .avttm-journal-content { line-height: 1.5; margin: 0; }
 .avttm-comp-content img, .avttm-journal-content img { max-width: 100%; height: auto; border: none; }
 .avttm-journal-content figcaption { color: var(--avttm-muted); font-size: 0.85em; text-align: center; }
