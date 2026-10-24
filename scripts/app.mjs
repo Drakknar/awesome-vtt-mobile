@@ -32,7 +32,7 @@ const BUSY_ACTIONS = new Set([
   "applyHp", "toggleInspiration", "shortRest", "longRest", "deathSave", "endConcentration", "exhaustion",
   "toggleCondition", "toggleEffect", "rollAbility", "rollSave", "rollSkill", "rollInitiative", "endTurn",
   "invQty", "invEquip", "invAttune", "invDetails", "usesAdjust", "slotAdjust", "diceRoll",
-  "chatSend", "chatMore", "chatMode", "compSearch", "compBrowse", "compMore", "compOpen", "compOpenSheet", "compBrowser",
+  "chatSend", "chatMore", "chatMode", "compSearch", "compBrowse", "compMore", "compOpen", "compOpenSheet", "compAddItem", "compBrowser",
   "journalOpen", "journalShared", "journalPage", "journalFull", "homeScreen", "testTurnAlert", "openFoundrySettings", "logOut"
 ]);
 // Not listed: actions that only change what's on screen (tabs, sheets, dice pool, advantage choice, going back).
@@ -83,7 +83,9 @@ export default class PhoneApp {
       onRolled: usedAdvantage => usedAdvantage && this.#setAdvMode("normal")
     });
     this.element = this.#build();
-    this.compendium = new CompendiumPanel({ render: () => this.renderCompendium(), root: () => this.#view("compendium") });
+    this.compendium = new CompendiumPanel({
+      render: () => this.renderCompendium(), root: () => this.#view("compendium"), actor: () => this.actor
+    });
     this.journal = new JournalPanel({ render: () => this.renderJournal(), root: () => this.#view("journal") });
     // The party's shared inventory (its own module, optional), drawn into the Party view.
     const partyView = this.#view("party");
@@ -418,6 +420,7 @@ export default class PhoneApp {
       return;
     }
     const context = { ...sheet.sheetContext(actor, this.state.sheetTab, id => `AVTTM.Sheet.Tab.${id}`), state: this.state };
+    await sheet.enrichSheet(context, actor);
     const tab = context.tab;
     const scroll = view.querySelector(".avttm-sheet-body")?.scrollTop ?? 0;
     const sameTab = this.#lastSheetTab === tab;
@@ -695,7 +698,13 @@ export default class PhoneApp {
     else if ( u.step === "targets" ) {
       const count = activity ? use.targetCount(activity) : null;
       const allies = activity ? use.prefersAllies(activity) : false;
-      const list = targets.getCandidates().map(t => ({ ...t, selected: u.selected.includes(t.id) }));
+      // On a scene with token vision, only what the character can see (asked of the table screen).
+      const vision = targets.checkVision(this.actor);
+      const list = targets.getCandidates(this.actor).map(t => ({ ...t, selected: u.selected.includes(t.id) }));
+      context.checking = vision === "checking";
+      // A creature picked earlier that the character can no longer see isn't targeted.
+      if ( !context.checking ) u.selected = u.selected.filter(id => list.some(t => t.id === id));
+      context.targetNote = game.i18n.format(`AVTTM.Targets.Vision.${vision}`, { name: this.actor?.name ?? "" });
       if ( allies ) list.sort((a, b) => (b.disposition - a.disposition) || a.name.localeCompare(b.name));
       context.targets = list;
       context.hint = activity?.target?.template?.type ? game.i18n.localize("AVTTM.Use.AreaHint")
@@ -775,7 +784,7 @@ export default class PhoneApp {
   #usePrevious() {
     const u = this.state.use;
     if ( !u ) return;
-    const candidates = new Set(targets.getCandidates().map(t => t.id));
+    const candidates = new Set(targets.getCandidates(this.actor).map(t => t.id));
     u.selected = targets.selectedIds().filter(id => candidates.has(id));
     return this.#useNext();
   }
