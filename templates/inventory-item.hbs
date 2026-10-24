@@ -20,13 +20,14 @@
       <i class="fa-solid fa-sun" inert></i>
     </button>
     {{/if}}
-    {{#if @root.canFavorite}}
+    {{!-- SotDL: no star on gear that does nothing when used (noFavorite), unless it is already a favorite. --}}
+    {{#if @root.canFavorite}}{{#if (or favorite (not noFavorite))}}
     <button type="button" data-action="toggleFavorite" data-item-id="{{id}}" class="avttm-favorite {{#if favorite}}active{{/if}}"
             aria-label="{{#if favorite}}{{localize 'AVTTM.Sheet.Unfavorite' name=name}}{{else}}{{localize 'AVTTM.Sheet.Favorite' name=name}}{{/if}}"
             aria-pressed="{{#if favorite}}true{{else}}false{{/if}}">
       <i class="{{#if favorite}}fa-solid{{else}}fa-regular{{/if}} fa-star" inert></i>
     </button>
-    {{/if}}
+    {{/if}}{{/if}}
     {{#if @root.toParty}}
     <button type="button" data-action="invToParty" data-item-id="{{id}}" aria-label="{{localize 'AVTTM.Inventory.ToParty'}}">
       <i class="fa-solid fa-sack-dollar" inert></i>

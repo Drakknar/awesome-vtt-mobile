@@ -12,7 +12,7 @@ The phone also runs in **Shadow of the Demon Lord** worlds (system `demonlord` 6
 
 Also:
 - **Targets:** tapping a weapon or an attack spell opens the use dialog: pick the targets (shown on the table's map as you tap), then boons / banes and a whole-number modifier. One attack per weapon or spell target; talents and gear that attack also ask, and use the first target. On a chat card, **Roll damage**, **Apply damage**, healing and effect buttons (and the notice's Roll damage button) first ask who they are for, with your last targets already chosen.
-- **Damage after attacks** (setting "Roll damage with attacks"), **prompts** (GM challenge requests; Fast / Slow at the start of an encounter), **favorites** (stars; tap the portrait for the row) and the **Party** tab (Shared Inventory module, a Party actor the GM creates or chooses).
+- **Damage after attacks** (setting "Roll damage with attacks"), **prompts** (GM challenge requests; Fast / Slow at the start of an encounter), **favorites** (stars; tap the portrait for the row; only weapons, talents, spells and gear that does something when used, so not a candle) and the **Party** tab (Shared Inventory module, a Party actor the GM creates or chooses).
 
 ## Setup
 
