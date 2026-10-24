@@ -237,6 +237,10 @@
       "autoDamage": {
         "Name": "Roll damage with attacks",
         "Hint": "D&D 5e only: after an attack roll, roll its damage straight away (hit or miss; critical damage on a critical hit). In Shadow of the Demon Lord, roll damage with the attack card's button."
+      },
+      "askAdvantage": {
+        "Name": "Ask for advantage",
+        "Hint": "Rolling an ability check, saving throw or skill from the sheet first asks whether it has advantage or disadvantage, preset to the Next roll choice."
       }
     },
     "Chat": {
