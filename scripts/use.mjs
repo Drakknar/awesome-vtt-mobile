@@ -227,7 +227,8 @@ export async function usageOptions(activity, base = {}) {
   else if ( scale.allowed && (config.scaling !== false) ) {
     const max = scale.max ? simplify(scale.max) : Infinity;
     if ( max > 1 ) {
-      options.scaling = { value: Math.clamp((config.scaling ?? 0) + 1, 1, max), max: Number.isFinite(max) ? max : null };
+      const value = Math.clamp((config.scaling ?? 0) + 1, 1, max);
+      options.scaling = { value, max: Number.isFinite(max) ? max : null };
     }
   }
 
