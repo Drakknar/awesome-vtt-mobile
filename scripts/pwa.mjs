@@ -22,6 +22,10 @@ export const isStandalone = () => window.matchMedia("(display-mode: standalone)"
 export const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent)
   || ((navigator.platform === "MacIntel") && (navigator.maxTouchPoints > 1));
 
+/**
+ * Show the browser's install prompt, if it offered one.
+ * @returns {Promise<boolean>} Whether the user installed the app.
+ */
 export async function promptInstall() {
   if ( !installPrompt ) return false;
   const prompt = installPrompt;

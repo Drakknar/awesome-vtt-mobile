@@ -9,11 +9,17 @@ import { getSetting } from "./settings.mjs";
  *   (core setting "Combat Theme"), this alert stays silent so the sound doesn't play twice.
  */
 
-/** @type {(state: {kind: "turn"|"next", name: string}|null) => void} */
+/**
+ * Shows or hides the turn banner (set by initTurnAlert).
+ * @type {(state: {kind: "turn"|"next", name: string}|null) => void}
+ */
 let show = () => {};
 let lastKey = null;
 
-/** @param {function} onShow  Receives the banner state to display, or null to hide it. */
+/**
+ * Watch the combat turns and alert this user when their character's turn comes or is next.
+ * @param {function} onShow  Receives the banner state to display, or null to hide it.
+ */
 export function initTurnAlert(onShow) {
   show = onShow;
   Hooks.on("combatTurnChange", combat => check(combat));
@@ -25,6 +31,11 @@ export function initTurnAlert(onShow) {
 
 const mine = combatant => !!combatant && !game.user.isGM && combatant.isOwner;
 
+/**
+ * Alert for the combat's current turn, once per turn.
+ * @param {Combat|undefined} combat
+ * @returns {void}
+ */
 function check(combat) {
   if ( !combat?.started || !combat.active ) return show(null);
   const key = `${combat.id}:${combat.round}:${combat.turn}`;
@@ -47,6 +58,9 @@ function check(combat) {
   show(null);
 }
 
+/**
+ * Play the chosen alert sound, unless the world's combat theme already plays one.
+ */
 function playSound() {
   const choice = getSetting("turnAlertSound");
   if ( choice === "none" ) return;
@@ -58,6 +72,10 @@ function playSound() {
     .catch(err => console.warn("Turn alert sound could not be played", err));
 }
 
+/**
+ * Vibrate the phone, if the user turned that on.
+ * @param {number|number[]} pattern
+ */
 function vibrate(pattern) {
   if ( getSetting("turnAlertVibrate") ) navigator.vibrate?.(pattern);
 }

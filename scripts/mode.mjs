@@ -1,11 +1,15 @@
 import { getSetting, setSetting } from "./settings.mjs";
 
-/** What the browser reports about this device; logged to the console to help when detection guesses wrong. */
+/**
+ * What the browser reports about this device; logged to the console to help when detection guesses wrong.
+ * @returns {{coarsePointer: boolean, anyFinePointer: boolean, mobileBrowser: boolean, shortSide: number}}
+ */
 function deviceInfo() {
   return {
     coarsePointer: window.matchMedia("(pointer: coarse)").matches,
     anyFinePointer: window.matchMedia("(any-pointer: fine)").matches,
-    mobileBrowser: (navigator.userAgentData?.mobile === true) || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent),
+    mobileBrowser: (navigator.userAgentData?.mobile === true)
+      || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent),
     shortSide: Math.min(window.screen.width, window.screen.height)
   };
 }
@@ -14,6 +18,8 @@ function deviceInfo() {
  * A phone or small tablet: a small screen, and either a mobile browser or a touch-only pointer.
  * Pointer media queries alone aren't reliable (some Android browsers also report a fine pointer), so the
  * browser's own "mobile" signal is accepted too.
+ * @param {object} info
+ * @returns {boolean}
  */
 function looksLikePhone(info = deviceInfo()) {
   const touchOnly = info.coarsePointer && !info.anyFinePointer;
@@ -26,7 +32,10 @@ const ASK_DELAY_MS = 1500;
 /** Phone mode asked for by the page address (`?phone=on|off`), used until the setting has been saved. */
 let linkMode = null;
 
-/** Is the phone app shown on this device? "auto" becomes "on" or "off" once the user has answered. */
+/**
+ * Is the phone app shown on this device? "auto" becomes "on" or "off" once the user has answered.
+ * @returns {boolean}
+ */
 export const isPhoneMode = () => (linkMode ?? getSetting("phoneMode")) === "on";
 
 /**
@@ -101,6 +110,10 @@ export async function applyCanvasPreference() {
   return false;
 }
 
+/**
+ * Reload the page shortly, after telling the user why.
+ * @returns {boolean}
+ */
 function reload() {
   ui.notifications?.info("AVTTM.Mode.Reloading", { localize: true });
   window.setTimeout(() => window.location.reload(), 500);
@@ -128,7 +141,11 @@ const PHONE_NOTICES = [
   "ERROR.BrowserVersion"
 ];
 
-/** A pattern matching a localized message as plain text, with its {placeholders} as wildcards. */
+/**
+ * A pattern matching a localized message as plain text, with its {placeholders} as wildcards.
+ * @param {string|undefined} text
+ * @returns {RegExp|null}
+ */
 function noticePattern(text) {
   if ( !text ) return null;
   const escaped = text.replace(/[.*+?^$()|[\]\\]/g, "\\$&");

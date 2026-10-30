@@ -12,7 +12,10 @@ const SECTIONS = [
   { label: "AVTTM.SettingsView.GM", keys: ["targetList", "homeScreen"] }
 ];
 
-/** The table module's seat choice (its API), when it is active in this world. */
+/**
+ * The table module's seat choice (its API), when it is active in this world.
+ * @returns {object|null}
+ */
 const tableSeats = () => {
   const table = game.modules.get("awesome-vtt");
   return (table?.active && table.api?.moveSeat) ? table.api : null;
@@ -76,6 +79,8 @@ export function renderSettingsView(container, actor) {
 /**
  * "Table seat": where the character sits around the table screen (the table module's seat choice). A taken seat is
  * swapped; a character that isn't seated can only take a free seat. Players' choices are saved by the GM.
+ * @param {Actor|null} actor
+ * @returns {HTMLFieldSetElement|null}
  */
 function seatSection(actor) {
   const seats = tableSeats();
@@ -112,6 +117,11 @@ function seatSection(actor) {
 const button = (action, icon, label) =>
   `<button type="button" data-action="${action}"><i class="fa-solid ${icon}" inert></i> ${game.i18n.localize(label)}</button>`;
 
+/**
+ * Disable a group's fields and say why under them.
+ * @param {HTMLElement} group
+ * @param {string} hintKey
+ */
 function disable(group, hintKey) {
   for ( const input of group.querySelectorAll("input, select") ) input.disabled = true;
   const hint = document.createElement("p");
@@ -120,7 +130,11 @@ function disable(group, hintKey) {
   group.append(hint);
 }
 
-/** Save a changed setting. Values are cleaned by the setting's own field, so they keep their type and limits. */
+/**
+ * Save a changed setting. Values are cleaned by the setting's own field, so they keep their type and limits.
+ * @param {Event} event
+ * @returns {Promise<unknown>}
+ */
 async function onChange(event) {
   // Compound inputs (e.g. the range slider) may report the change from an unnamed inner input.
   const input = event.target.closest("[name]");
@@ -133,20 +147,27 @@ async function onChange(event) {
   input.disabled = true;
   try {
     await game.settings.set(MODULE_ID, key, setting.type.clean(raw));
-  } catch(err) {
+  } catch ( err ) {
     ui.notifications.error(err.message);
   } finally {
     input.disabled = false;
   }
 }
 
-/** Move the character; a saved move re-renders this tab (seatsChanged, main.mjs). */
+/**
+ * Move the character; a saved move re-renders this tab (seatsChanged, main.mjs).
+ * @param {HTMLSelectElement} select
+ * @returns {Promise<boolean>|undefined}
+ */
 function onSeatChange(select) {
   const actor = game.actors.get(select.dataset.actorId);
   if ( actor && select.value ) return tableSeats()?.moveSeat(actor, select.value);
 }
 
-/** Home screen instructions: the install prompt where the browser offers one, otherwise how to add it by hand. */
+/**
+ * Home screen instructions: the install prompt where the browser offers one, otherwise how to add it by hand.
+ * @returns {string|null}
+ */
 export function homeScreenHelp() {
   if ( canPromptInstall() ) return null;
   return game.i18n.localize(isIOS() ? "AVTTM.SettingsView.HomeScreenIOS" : "AVTTM.SettingsView.HomeScreenOther");
