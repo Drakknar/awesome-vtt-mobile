@@ -12,5 +12,6 @@ export const TURN_SOUNDS = {
 /**
  * Views of the phone app, in tab bar order: the core's shared sections (with Party while the shared inventory module
  * is active), then the phone's own Settings. Read once the game is ready.
+ * @returns {string[]}
  */
 export const views = () => [...sectionList(), "settings"];

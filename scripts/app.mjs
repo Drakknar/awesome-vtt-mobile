@@ -18,6 +18,8 @@ const { renderTemplate } = foundry.applications.handlebars;
 /**
  * A tab bar that scrolls sideways (more tabs than fit, e.g. SotDL's six sheet tabs) is drawn again with each render:
  * put back where it was scrolled to, then bring the chosen tab into view, so a tap doesn't jump back to the start.
+ * @param {HTMLElement} root
+ * @param {number} scrollLeft
  */
 function keepTabsInView(root, scrollLeft) {
   const bar = root.querySelector(".avttm-subtabs");
@@ -27,7 +29,9 @@ function keepTabsInView(root, scrollLeft) {
   if ( !active ) return;
   const left = active.offsetLeft - bar.offsetLeft;
   if ( left < bar.scrollLeft ) bar.scrollLeft = left;
-  else if ( (left + active.offsetWidth) > (bar.scrollLeft + bar.clientWidth) ) bar.scrollLeft = left + active.offsetWidth - bar.clientWidth;
+  else if ( (left + active.offsetWidth) > (bar.scrollLeft + bar.clientWidth) ) {
+    bar.scrollLeft = left + active.offsetWidth - bar.clientWidth;
+  }
 }
 const tpl = name => `modules/${MODULE_ID}/templates/${name}.hbs`;
 
@@ -117,25 +121,35 @@ export default class PhoneApp {
   }
 
   #lastSheetTab = null;
+
   #sheetDraw = 0;
 
   /* -------------------------------------------- */
   /*  Character                                   */
   /* -------------------------------------------- */
 
-  /** Characters this user can play (the GM owns, and so sees, every character). */
+  /**
+   * Characters this user can play (the GM owns, and so sees, every character).
+   * @returns {Actor[]}
+   */
   get ownedCharacters() {
     return game.actors
       .filter(a => (a.type === "character") && a.isOwner)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  /** Is a character list showing (no character chosen yet, or the switcher open)? */
+  /**
+   * Is a character list showing (no character chosen yet, or the switcher open)?
+   * @returns {boolean}
+   */
   get showsPicker() {
     return !this.actor || (this.state.overlay === "picker");
   }
 
-  /** The chosen character, else the user's assigned character, else their only character. */
+  /**
+   * The chosen character, else the user's assigned character, else their only character.
+   * @returns {Actor|null}
+   */
   get actor() {
     const chosen = game.actors.get(getSetting("actorId"));
     if ( chosen?.isOwner ) return chosen;
@@ -175,6 +189,7 @@ export default class PhoneApp {
   /**
    * The tab bar is a separate top-level element, so it can sit above Foundry's windows (which would otherwise cover
    * it, as they are stacked above the phone app). Full-screen windows end just above it.
+   * @returns {HTMLElement}
    */
   #buildTabbar() {
     const nav = document.createElement("nav");
@@ -251,11 +266,15 @@ export default class PhoneApp {
         tone: advModeTone(this.state.advMode),
         short: advModeShort(ADV_SHORT, this.state.advMode),
         label: sys.rollModeLabel(this.state.advMode) ?? game.i18n.localize(ADV_MODES[this.state.advMode])
-      },
+      }
     });
   }
 
-  /** Data for the quick actions sheet. */
+  /**
+   * Data for the quick actions sheet.
+   * @param {Actor} actor
+   * @returns {object}
+   */
   #launcherContext(actor) {
     const context = sheet.quickActionsContext(actor, {
       tab: this.state.quickTab, tabLabel: id => `AVTTM.Launcher.Tab.${id}`,
@@ -265,7 +284,10 @@ export default class PhoneApp {
     return { ...context, state: this.state };
   }
 
-  /** The active encounter, if it has started. */
+  /**
+   * The active encounter, if it has started.
+   * @returns {Combat|null}
+   */
   get combat() {
     const combat = game.combats.find(c => c.active) ?? game.combat;
     return combat?.started ? combat : null;
@@ -298,7 +320,10 @@ export default class PhoneApp {
     el.querySelector(".current")?.scrollIntoView({ block: "nearest", inline: "center" });
   }
 
-  /** Banner from the turn alert; null hides it. */
+  /**
+   * Banner from the turn alert; null hides it.
+   * @param {{kind: "turn"|"next", name: string}|null} turn
+   */
   showTurn(turn) {
     const el = this.element.querySelector(".avttm-turn");
     el.hidden = !turn;
@@ -403,7 +428,7 @@ export default class PhoneApp {
       if ( !(await sheet.sendChat(input?.value, this.actor)) ) return;
       this.state.chat.text = "";
       if ( input ) input.value = "";
-    } catch(err) {
+    } catch ( err ) {
       ui.notifications.error(err.message);
     }
   });
@@ -501,7 +526,11 @@ export default class PhoneApp {
     else overlay.replaceChildren();
   }
 
-  /** Open one bottom sheet (closing any other) or, with null, close it; the pill shows which one is open. */
+  /**
+   * Open one bottom sheet (closing any other) or, with null, close it; the pill shows which one is open.
+   * @param {string|null} kind
+   * @returns {Promise<void>}
+   */
   async #setOverlay(kind) {
     if ( kind !== "use" ) {
       // Targets shown on the map while picking, but not used: show the ones in use again.
@@ -565,7 +594,7 @@ export default class PhoneApp {
    * @returns {Promise<boolean>}
    */
   askCardTargets(title = "") {
-    // getCandidates is empty when the GM turned the target list off.
+    // GetCandidates is empty when the GM turned the target list off.
     if ( !this.#cardTargetsHere || !targets.getCandidates().length ) return Promise.resolve(true);
     this.state.use?.resolve?.(false);
     return new Promise(resolve => {
@@ -577,12 +606,18 @@ export default class PhoneApp {
     });
   }
 
-  /** Card buttons that act on targets are picked for on the phone (the adapter's CARD_TARGET_BUTTONS, no map). */
+  /**
+   * Card buttons that act on targets are picked for on the phone (the adapter's CARD_TARGET_BUTTONS, no map).
+   * @returns {boolean}
+   */
   get #cardTargetsHere() {
     return !!sys.CARD_TARGET_BUTTONS && !canvas?.ready;
   }
 
-  /** A tap on a SotDL card button in the Chat view: ask for its targets, then let the system's listener run. */
+  /**
+   * A tap on a SotDL card button in the Chat view: ask for its targets, then let the system's listener run.
+   * @param {PointerEvent} event
+   */
   #onCardTargetClick(event) {
     const button = event.target.closest?.(sys.CARD_TARGET_BUTTONS);
     const li = button?.closest(".avttm-chat-log .chat-message");
@@ -624,7 +659,11 @@ export default class PhoneApp {
     return this.#useItem?.system.activities?.get(this.state.use?.activityId) ?? null;
   }
 
-  /** Tap on an item: open the use dialog when there is something to choose, otherwise use it straight away. */
+  /**
+   * Tap on an item: open the use dialog when there is something to choose, otherwise use it straight away.
+   * @param {string} itemId
+   * @returns {Promise<unknown>}
+   */
   async #startUse(itemId) {
     const actor = this.actor;
     const item = actor?.items.get(itemId);
@@ -646,6 +685,8 @@ export default class PhoneApp {
   /**
    * SotDL: an attack (weapon, attack spell) asks for its targets (unless the GM turned the list off) and roll
    * options (boons or banes, a modifier), like a dnd5e attack; anything else is used at once with the Next roll.
+   * @param {Item} item
+   * @returns {Promise<unknown>}
    */
   #startItemUse(item) {
     if ( !sys.itemNeedsTargets(item) ) return this.#d20(mode => sys.useItem(this.actor, item.id, mode));
@@ -784,7 +825,10 @@ export default class PhoneApp {
     return context;
   }
 
-  /** Tap on a target: update the list in place, so it doesn't jump back to the top. */
+  /**
+   * Tap on a target: update the list in place, so it doesn't jump back to the top.
+   * @param {string} tokenId
+   */
   #toggleUseTarget(tokenId) {
     const u = this.state.use;
     if ( !u ) return;
@@ -807,7 +851,10 @@ export default class PhoneApp {
     }
   }
 
-  /** "Same as last time": take the previous targets and go on. */
+  /**
+   * "Same as last time": take the previous targets and go on.
+   * @returns {Promise<unknown>|undefined}
+   */
   #usePrevious() {
     const u = this.state.use;
     if ( !u ) return;
@@ -850,12 +897,19 @@ export default class PhoneApp {
     return this.renderOverlay();
   }
 
-  /** Closing the use dialog (like any other bottom sheet) also forgets its choices; see #setOverlay. */
+  /**
+   * Closing the use dialog (like any other bottom sheet) also forgets its choices; see #setOverlay.
+   * @returns {Promise<void>}
+   */
   #closeUse() {
     return this.#setOverlay(null);
   }
 
-  /** Apply the choices (targets now; roll options when dnd5e rolls) and use the activity. */
+  /**
+   * Apply the choices (targets now; roll options when dnd5e rolls) and use the activity.
+   * @param {Activity} activity
+   * @returns {Promise<unknown>}
+   */
   async #performUse(activity) {
     const u = this.state.use;
     const usageChoices = u.usage;
@@ -865,7 +919,8 @@ export default class PhoneApp {
     if ( options ) {
       const bonus = use.cleanBonus(u.bonus);
       if ( options.kind === "attack" ) {
-        use.setPendingRoll(activity, { attack: { mode: u.mode, bonus, attackMode: u.attackMode, ammunition: u.ammunition, mastery: u.mastery } });
+        const { attackMode, ammunition, mastery } = u;
+        use.setPendingRoll(activity, { attack: { mode: u.mode, bonus, attackMode, ammunition, mastery } });
         // The "Next roll" choice was used by this attack.
         if ( this.state.advMode !== "normal" ) this.#setAdvMode("normal");
       }
@@ -886,7 +941,10 @@ export default class PhoneApp {
     resolve(true);
   }
 
-  /** SotDL: use the item with the picked targets (token documents), boons or banes and modifier. */
+  /**
+   * SotDL: use the item with the picked targets (token documents), boons or banes and modifier.
+   * @returns {Promise<unknown>}
+   */
   async #performItemUse() {
     const u = this.state.use;
     const actor = this.actor;
@@ -909,12 +967,19 @@ export default class PhoneApp {
     this.#view("dice").innerHTML = await renderTemplate(tpl("dice"), { ...this.dice.context(), advModes: this.#advModes(), advScale: advModeScale() });
   }
 
-  /** The Normal / Advantage / Disadvantage choice (Dice view, prompts, attack options). */
+  /**
+   * The Normal / Advantage / Disadvantage choice (Dice view, prompts, attack options).
+   * @param {string} active
+   * @returns {object[]}
+   */
   #advModes(active = this.state.advMode) {
     return advModeChoices(ADV_MODES, active);
   }
 
-  /** Arm (or clear) advantage / disadvantage for the next d20 roll; shown as a chip on the pill. */
+  /**
+   * Arm (or clear) advantage / disadvantage for the next d20 roll; shown as a chip on the pill.
+   * @param {string} mode
+   */
   #setAdvMode(mode) {
     if ( !advModes().includes(mode) ) return;
     this.state.advMode = mode;
@@ -961,7 +1026,12 @@ export default class PhoneApp {
     return coreUI.runAction(target, BUSY_ACTIONS, () => this.#dispatch(target.dataset.action, target), `${MODULE_ID} | Action`);
   }
 
-  /** Run one action of the app (buttons with data-action). */
+  /**
+   * Run one action of the app (buttons with data-action).
+   * @param {string} action
+   * @param {HTMLElement} target
+   * @returns {Promise<unknown>}
+   */
   async #dispatch(action, target) {
     if ( action === "journalShared" ) this.tabbar.querySelector('[data-view="journal"]')?.classList.remove("avttm-attention");
     if ( CompendiumPanel.ACTIONS.has(action) ) return this.compendium.handle(action, target);
@@ -970,7 +1040,9 @@ export default class PhoneApp {
     // A check, save or skill (SotDL: an attribute) asks for advantage or boons first (per-browser setting), in a prompt
     // preset to the Next roll.
     if ( sheet.D20_ACTIONS.has(action) && getSetting("askBoons") && askSheetRoll(this.prompts, this.actor, action, target.dataset) ) return;
-    if ( sheet.D20_ACTIONS.has(action) ) return this.#d20(mode => sheet.runSheetAction(this.actor, action, target.dataset, mode));
+    if ( sheet.D20_ACTIONS.has(action) ) {
+      return this.#d20(mode => sheet.runSheetAction(this.actor, action, target.dataset, mode));
+    }
     if ( sheet.SHEET_ACTIONS.has(action) ) {
       return sheet.runSheetAction(this.actor, action, target.dataset, "normal", { toggled: this.state.toggledEffects });
     }
@@ -1041,7 +1113,9 @@ export default class PhoneApp {
       case "chatMode": return this.#setMessageMode(target.dataset.mode);
       case "chatMore": s.chat.limit += CHAT_PAGE; return this.renderChat();
       case "chatFilter":
-        if ( sheet.CHAT_FILTERS.includes(target.dataset.filter) ) Object.assign(s.chat, { filter: target.dataset.filter, limit: CHAT_PAGE });
+        if ( sheet.CHAT_FILTERS.includes(target.dataset.filter) ) {
+          Object.assign(s.chat, { filter: target.dataset.filter, limit: CHAT_PAGE });
+        }
         return this.renderChat();
 
       // Settings
@@ -1110,13 +1184,19 @@ export default class PhoneApp {
     }
   }
 
-  /** Run a d20 roll with the armed advantage choice, then reset it so it doesn't carry over to the next roll. */
+  /**
+   * Run a d20 roll with the armed advantage choice, then reset it so it doesn't carry over to the next roll.
+   * @param {(mode: string) => Promise<unknown>} roll
+   */
   async #d20(roll) {
     await roll(this.state.advMode);
     if ( this.state.advMode !== "normal" ) this.#setAdvMode("normal");
   }
 
-  /** Switch between damage, heal and temp HP without re-rendering, so a typed amount is kept. */
+  /**
+   * Switch between damage, heal and temp HP without re-rendering, so a typed amount is kept.
+   * @param {string} mode
+   */
   #setHpMode(mode) {
     if ( !sys.HP_MODES.includes(mode) ) return;
     this.state.hpMode = mode;

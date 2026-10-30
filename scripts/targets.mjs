@@ -35,7 +35,10 @@ const changed = () => {
 /** Set by the SotDL bridge: copies the phone's targets into game.user.targets. */
 let syncUserTargets = null;
 
-/** The scene players are looking at at the table: the active scene. */
+/**
+ * The scene players are looking at at the table: the active scene.
+ * @returns {Scene|null}
+ */
 const targetScene = () => game.scenes.active ?? null;
 
 export const targetsEnabled = () => getSetting("targetList") !== "off";
@@ -51,7 +54,10 @@ let vision = { key: null, ids: null, state: "off", at: 0, asking: false };
 
 const visionKey = (scene, actor) => `${scene.id}:${actor.id}`;
 
-/** The table screen's user (Awesome VTT's world setting), if that module is active and the user is logged in. */
+/**
+ * The table screen's user (Awesome VTT's world setting), if that module is active and the user is logged in.
+ * @returns {string|null}
+ */
 function tableScreenUser() {
   if ( !game.modules.get("awesome-vtt")?.active ) return null;
   const id = game.settings.settings.has("awesome-vtt.tableUser") ? game.settings.get("awesome-vtt", "tableUser") : null;
@@ -61,6 +67,8 @@ function tableScreenUser() {
 /**
  * Where the check of what `actor` can see stands for the target list: "off" (the scene doesn't use token vision),
  * "checking", "known" or "unknown" (no device could tell). Starts a new check when the last answer is stale.
+ * @param {Actor|null} actor
+ * @returns {"off"|"checking"|"known"|"unknown"}
  */
 export function checkVision(actor) {
   const scene = targetScene();
@@ -92,6 +100,7 @@ export function checkVision(actor) {
  * Tokens the user may target, with names hidden the way the token's nameplate setting hides them.
  * @param {Actor} [actor]  The character using an action: only what it can see (see checkVision), nothing while
  *   that is being checked. Without it, every creature.
+ * @returns {object[]}
  */
 export function getCandidates(actor) {
   const scene = targetScene();
@@ -117,12 +126,18 @@ export function getCandidates(actor) {
     .sort((a, b) => (a.disposition - b.disposition) || a.name.localeCompare(b.name));
 }
 
-/** Ids of the current targets that are still on the target scene (the "previous" targets offered again). */
+/**
+ * Ids of the current targets that are still on the target scene (the "previous" targets offered again).
+ * @returns {string[]}
+ */
 export function selectedIds() {
   return selectedTokens().map(t => t.id);
 }
 
-/** Replace all targets at once (from the use dialog), and tell the other screens. */
+/**
+ * Replace all targets at once (from the use dialog), and tell the other screens.
+ * @param {string[]} tokenIds
+ */
 export function setTargets(tokenIds) {
   const scene = targetScene();
   if ( !scene ) return;
@@ -136,6 +151,9 @@ export function setTargets(tokenIds) {
   changed();
 }
 
+/**
+ * Drop all targets, telling the other screens if there were any.
+ */
 function clearTargets() {
   const had = selected.size;
   selected.clear();
@@ -143,6 +161,9 @@ function clearTargets() {
   changed();
 }
 
+/**
+ * Tell the other screens this user's targets on the target scene.
+ */
 function broadcast() {
   const scene = targetScene();
   if ( !scene ) return;
@@ -153,7 +174,11 @@ function broadcast() {
 const PING_CURSOR_MS = 1500;
 let cursorTimer = null;
 
-/** The centre of a token on its scene (the phone has no map to ask). */
+/**
+ * The centre of a token on its scene (the phone has no map to ask).
+ * @param {TokenDocument} token
+ * @returns {{x: number, y: number}}
+ */
 function tokenCenter(token) {
   if ( typeof token.getCenterPoint === "function" ) return token.getCenterPoint();
   const size = token.parent?.grid?.size ?? 100;
@@ -190,13 +215,19 @@ export function restoreTargets() {
   broadcast();
 }
 
-/** Token documents of the current targets that still exist and are visible. */
+/**
+ * Token documents of the current targets that still exist and are visible.
+ * @returns {TokenDocument[]}
+ */
 export function selectedTokens() {
   const scene = targetScene();
   if ( !scene || (scene.id !== sceneId) ) return [];
   return [...selected].map(id => scene.tokens.get(id)).filter(t => t && !t.hidden);
 }
 
+/**
+ * Let dnd5e's roll cards take this phone's targets (they have no map tokens to read).
+ */
 function installDnd5eBridge() {
   const TargetsField = globalThis.dnd5e?.dataModels?.chatMessage?.fields?.TargetsField;
   if ( !TargetsField?.getDescriptors ) {
@@ -211,7 +242,11 @@ function installDnd5eBridge() {
   };
 }
 
-/** A target as SotDL reads a map token: id, name, document, actor and centre (no map methods). */
+/**
+ * A target as SotDL reads a map token: id, name, document, actor and centre (no map methods).
+ * @param {TokenDocument} doc
+ * @returns {object}
+ */
 function tokenLike(doc) {
   return {
     id: doc.id,

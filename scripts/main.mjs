@@ -93,6 +93,9 @@ Hooks.once("ready", async () => {
   sys.rollDamageAfterAttacks(actor => getSetting("autoDamage") && actor.isOwner);
 });
 
+/**
+ * Register the phone app's hooks: refreshes, settings, and the data, combat and chat the app shows.
+ */
 function registerAppHooks() {
   Hooks.on(`${MODULE_ID}.refresh`, () => app.render());
   Hooks.on(`${MODULE_ID}.keepAwake`, () => setKeepAwake(getSetting("keepAwake")));

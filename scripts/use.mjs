@@ -21,7 +21,11 @@ const ROLLS_ON_USE = { attack: "attack", damage: "damage", heal: "damage" };
 const PENDING_MS = 2 * 60 * 1000;
 export const MAX_BONUS = 40;
 
-/** Activities of an item the user can use. */
+/**
+ * Activities of an item the user can use.
+ * @param {Item|undefined} item
+ * @returns {Activity[]}
+ */
 export function usableActivities(item) {
   return (item?.system.activities?.contents ?? []).filter(a => a.canUse !== false);
 }
@@ -29,21 +33,32 @@ export function usableActivities(item) {
 /**
  * Does this activity need targets picked? Attacks and saves always do; others when they affect creatures other than
  * the user, or cover an area (then the player picks the creatures inside, since templates need the map).
+ * @param {Activity} activity
+ * @returns {boolean}
  */
 export const needsTargets = activity => sys.needsTargets(activity, { areasNeedTargets: true });
 
-/** How many targets the activity asks for, if it's a plain number. */
+/**
+ * How many targets the activity asks for, if it's a plain number.
+ * @param {Activity} activity
+ * @returns {number|null}
+ */
 export function targetCount(activity) {
   const n = Number(activity.target?.affects?.count);
   return Number.isInteger(n) && (n > 0) ? n : null;
 }
 
-/** Does the activity prefer allies (heal, ally/willing targets)? Used to order the target list. */
+/**
+ * Does the activity prefer allies (heal, ally/willing targets)? Used to order the target list.
+ * @param {Activity} activity
+ * @returns {boolean}
+ */
 export const prefersAllies = activity =>
   (activity.type === "heal") || ["ally", "willing"].includes(activity.target?.affects?.type);
 
 /**
  * Roll options offered before use, or null when the activity doesn't roll straight away.
+ * @param {Activity} activity
  * @returns {{kind: "attack"|"damage", attackModes?: object[], ammunition?: object[], mastery?: object[]}|null}
  */
 export function rollOptions(activity) {
@@ -66,7 +81,11 @@ export function rollOptions(activity) {
   };
 }
 
-/** A situational bonus the player typed: a short, valid roll formula, or "". */
+/**
+ * A situational bonus the player typed: a short, valid roll formula, or "".
+ * @param {string|undefined} text
+ * @returns {string}
+ */
 export function cleanBonus(text) {
   const bonus = String(text ?? "").trim().slice(0, MAX_BONUS);
   if ( !bonus ) return "";
@@ -79,7 +98,10 @@ export function cleanBonus(text) {
 /*  Casting: spell slot, concentration, resources */
 /* -------------------------------------------- */
 
-/** Areas and summoned creatures can only be placed on the map. */
+/**
+ * Areas and summoned creatures can only be placed on the map.
+ * @returns {boolean}
+ */
 const canPlaceOnMap = () => !!canvas?.ready;
 
 /** Activity types whose usage questions the Casting step covers (others keep dnd5e's dialog, e.g. bastion orders). */
@@ -89,6 +111,7 @@ const COVERED_TYPES = new Set(["attack", "check", "damage", "enchant", "heal", "
  * "Cast" and "forward" activities run another activity: the spell they cast, or a sibling activity. dnd5e would
  * ask about that one (and, for a spell with several activities, which one). Resolve it up front so the phone's
  * steps apply to it, with the same "cause" dnd5e sets, so linked levels and resources work as in dnd5e.
+ * @param {Activity} activity
  * @returns {Promise<{item: Item, activity: Activity|null, base: object}|null>}
  */
 export async function resolveActivity(activity) {
@@ -98,7 +121,8 @@ export async function resolveActivity(activity) {
     if ( !spell ) [spell] = await activity.actor.createEmbeddedDocuments("Item", [await activity.getCachedSpellData()]);
     if ( !spell ) return null;
     const activities = usableActivities(spell);
-    return { item: spell, activity: activities.length === 1 ? activities[0] : null, base: { cause: { activity: activity.relativeUUID } } };
+    const base = { cause: { activity: activity.relativeUUID } };
+    return { item: spell, activity: activities.length === 1 ? activities[0] : null, base };
   }
   if ( activity.type === "forward" ) {
     const target = activity.item.system.activities.get(activity.activity?.id);
@@ -111,13 +135,19 @@ export async function resolveActivity(activity) {
   return { item: activity.item, activity, base: {} };
 }
 
-/** Label for a summon / transform / enchantment profile, using dnd5e's own dialog class when it has one. */
+/**
+ * Label for a summon / transform / enchantment profile, using dnd5e's own dialog class when it has one.
+ * @param {Activity} activity
+ * @param {object} profile
+ * @param {object} rollData
+ * @returns {Promise<string>}
+ */
 async function profileLabel(activity, profile, rollData) {
   const Dialog = activity.metadata?.usage?.dialog;
   if ( typeof Dialog?.prototype?.getProfileLabel === "function" ) {
     try {
       return Dialog.prototype.getProfileLabel.call({ activity }, profile, rollData);
-    } catch { /* fall through */ }
+    } catch { /* Fall through */ }
   }
   const effect = await profile.getEffect?.();
   return profile.name || effect?.name || fromUuidSync(profile.uuid ?? "", { strict: false })?.name || "—";
@@ -128,12 +158,13 @@ async function profileLabel(activity, profile, rollData) {
  * Uses dnd5e's own defaults (`_prepareUsageConfig`) and its test for when the dialog is needed.
  * @param {Activity} activity
  * @param {object} [base]  Usage config from a cast / forward activity (see resolveActivity).
+ * @returns {Promise<object>}
  */
 export async function usageOptions(activity, base = {}) {
   let config;
   try {
     config = activity._prepareUsageConfig(foundry.utils.deepClone(base));
-  } catch(err) {
+  } catch ( err ) {
     console.warn(`${MODULE_ID} | Could not read the usage options of ${activity.uuid}`, err);
     return { needed: false, supported: false, base };
   }
@@ -162,7 +193,8 @@ export async function usageOptions(activity, base = {}) {
   if ( activity.requiresSpellSlot && (config.scaling !== false) ) {
     if ( linked ) {
       const minimumLevel = linked.spell?.level ?? item.system.level ?? 1;
-      const maximumLevel = scale.allowed ? (scale.max ? minimumLevel + simplify(scale.max) - 1 : Infinity) : minimumLevel;
+      const scaledMax = scale.max ? minimumLevel + simplify(scale.max) - 1 : Infinity;
+      const maximumLevel = scale.allowed ? scaledMax : minimumLevel;
       options.slots = Object.entries(CONFIG.DND5E.spellLevels ?? {})
         .filter(([level]) => (Number(level) >= minimumLevel) && (Number(level) <= maximumLevel))
         .map(([level, label]) => ({ value: `spell${level}`, label: game.i18n.localize(label), empty: false }));
@@ -194,7 +226,10 @@ export async function usageOptions(activity, base = {}) {
   // Other scaling (e.g. a feature used for more effect): a number, as in dnd5e's dialog (value = increase + 1).
   else if ( scale.allowed && (config.scaling !== false) ) {
     const max = scale.max ? simplify(scale.max) : Infinity;
-    if ( max > 1 ) options.scaling = { value: Math.clamp((config.scaling ?? 0) + 1, 1, max), max: Number.isFinite(max) ? max : null };
+    if ( max > 1 ) {
+      const value = Math.clamp((config.scaling ?? 0) + 1, 1, max);
+      options.scaling = { value, max: Number.isFinite(max) ? max : null };
+    }
   }
 
   if ( config.concentration?.begin ) {
@@ -244,6 +279,9 @@ export async function usageOptions(activity, base = {}) {
 /**
  * The usage configuration and dialog options for `activity.use()`, from the Casting step's choices.
  * Without the step (nothing to ask, or a case it doesn't cover), only placing on the map is turned off when needed.
+ * @param {Activity} activity
+ * @param {object|null} choices
+ * @returns {{usage: object, dialog: object}}
  */
 function usageFor(activity, choices) {
   const base = foundry.utils.deepClone(choices?.base ?? {});
@@ -262,7 +300,8 @@ function usageFor(activity, choices) {
   if ( choices.slot ) usage.spell = { slot: choices.slot };
   if ( choices.scaling ) usage.scaling = Math.max(0, (Number(choices.scaling.value) || 1) - 1);
   if ( choices.concentration ) {
-    usage.concentration = { begin: choices.concentrate !== false, end: choices.concentrate === false ? null : (choices.concentration.end || null) };
+    const end = (choices.concentrate === false) ? null : (choices.concentration.end || null);
+    usage.concentration = { begin: choices.concentrate !== false, end };
   }
   if ( choices.linkedResources ) usage.cause = { ...(usage.cause ?? {}), resources: choices.useLinked !== false };
   if ( choices.enchantment ) usage.enchantmentProfile = choices.enchantment.value;
@@ -272,7 +311,9 @@ function usageFor(activity, choices) {
     ...(choices.summonSize ? { creatureSize: choices.summonSize.value } : {}),
     ...(choices.summonType ? { creatureType: choices.summonType.value } : {})
   };
-  if ( choices.transformProfile ) usage.transform = { ...(config.transform ?? {}), profile: choices.transformProfile.value };
+  if ( choices.transformProfile ) {
+    usage.transform = { ...(config.transform ?? {}), profile: choices.transformProfile.value };
+  }
   return { usage, dialog: { configure: false } };
 }
 
@@ -295,6 +336,9 @@ export function setPendingRoll(activity, choices) {
 /**
  * The pending choices for this roll, used once. Matches the activity, or its item (a spell's own activity when it
  * is cast through a "cast" or "forward" activity).
+ * @param {object} config
+ * @param {string} kind
+ * @returns {object|null}
  */
 function take(config, kind) {
   if ( !pending || (Date.now() > pending.until) ) {
@@ -310,6 +354,11 @@ function take(config, kind) {
   return choices;
 }
 
+/**
+ * Add the typed situational bonus to a roll's parts.
+ * @param {object|undefined} roll
+ * @param {string} bonus
+ */
 function addBonus(roll, bonus) {
   if ( !roll || !bonus ) return;
   roll.parts = [...(roll.parts ?? []), "@situational"];
@@ -345,12 +394,15 @@ export function registerUseHooks() {
 /**
  * Use the activity through dnd5e's usage workflow, with the Casting step's choices (see usageFor).
  * dnd5e's usage dialog then only appears for the cases the step doesn't cover.
+ * @param {Activity} activity
+ * @param {object|null} choices
+ * @returns {Promise<unknown>}
  */
 export async function useActivity(activity, choices) {
   const { usage, dialog } = usageFor(activity, choices);
   try {
     return await activity.use(usage, dialog);
-  } catch(err) {
+  } catch ( err ) {
     console.error(`${MODULE_ID} | Using ${activity.uuid} failed`, err);
     ui.notifications.error(err.message);
     pending = null;

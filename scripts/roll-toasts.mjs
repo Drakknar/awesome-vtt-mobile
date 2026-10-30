@@ -10,6 +10,8 @@ import sys, { damageAction } from "../../awesome-vtt-core/scripts/system.mjs";
  * a "Roll damage" button (the core's damageAction), unless its damage is already rolled after the
  * attack ("Roll damage after attacks"); the damage roll's own message then shows the damage. `askTargets` runs
  * first (SotDL without the map: pick who the damage is for).
+ * @param {function(object): void} show
+ * @param {() => Promise<boolean>} askTargets
  */
 export function initRollToasts(show, askTargets = async () => true) {
   sys.onRollResult((result, message) => {
@@ -20,7 +22,11 @@ export function initRollToasts(show, askTargets = async () => true) {
   }, { enabled: () => getSetting("rollToasts") });
 }
 
-/** Label keys for the words of a roll notice. */
+/**
+ * Label keys for the words of a roll notice.
+ * @param {string} id
+ * @returns {string|undefined}
+ */
 const TOAST_LABELS = id => ({
   damage: "AVTTM.Toast.Damage", healing: "AVTTM.Toast.Healing", critical: "AVTTM.Toast.Critical", fumble: "AVTTM.Toast.Fumble",
   success: "AVTTM.Toast.Success", failure: "AVTTM.Toast.Failure", hit: "AVTTM.Toast.Hit", miss: "AVTTM.Toast.Miss",
