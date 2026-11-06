@@ -114,6 +114,9 @@
   {{/if}}
   {{/if}}
   {{#if simple}}
+  {{#if sources}}
+  {{> avttmBoonSources action="useSource"}}
+  {{/if}}
   {{!-- SotDL: a whole-number modifier (boons and banes are the choice above). --}}
   <label class="avttm-use-field"><span>{{localize "AVTTM.Use.Modifier"}}</span>
     <input type="text" name="useBonus" value="{{bonus}}" maxlength="3" inputmode="text" autocomplete="off"

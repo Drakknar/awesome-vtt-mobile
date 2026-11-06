@@ -20,6 +20,9 @@
 
   <button type="button" data-action="toggleInspiration" class="avttm-wide avttm-launcher-inspiration {{#if inspiration}}active{{/if}}"
           aria-pressed="{{#if inspiration}}true{{else}}false{{/if}}"><i class="fa-solid fa-star" inert></i> {{inspirationLabel}}</button>
+  {{#if revert}}
+  <button type="button" data-action="revertForm" class="avttm-wide"><i class="fa-solid fa-person-rays" inert></i> {{localize "AVTTC.Transform.revert"}}</button>
+  {{/if}}
 
   {{#if quickConditions.length}}
   <div class="avttm-launcher-chips">

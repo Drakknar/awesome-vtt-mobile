@@ -39,6 +39,8 @@ Hooks.once("init", () => {
   foundry.applications.handlebars.loadTemplates({ avttmSpellTags: `modules/${MODULE_ID}/templates/spell-tags.hbs` });
   // SotDL's "Banes … Boons" line under the Next roll choice ({{> avttmAdvScale}}): Dice view, prompts, attack options.
   foundry.applications.handlebars.loadTemplates({ avttmAdvScale: `modules/${MODULE_ID}/templates/adv-scale.hbs` });
+  // SotDL 6.1.14's boon and bane sources ({{> avttmBoonSources action=…}}): prompts and the use dialog.
+  foundry.applications.handlebars.loadTemplates({ avttmBoonSources: `modules/${MODULE_ID}/templates/boon-sources.hbs` });
   // Hide Foundry's desktop interface as early as possible on a phone.
   if ( isPhoneMode() ) {
     document.body.classList.add("avttm-phone");
@@ -110,6 +112,12 @@ function registerAppHooks() {
   Hooks.on("updateUser", user => user.isSelf && app.render());
   Hooks.on("createActor", () => app.render());
   Hooks.on("deleteActor", () => app.render());
+  // A transformed form reverted by a player keeps existing without its flags (only a GM deletes it). Only transform
+  // flag changes of the current character or its forms (any character while the picker shows).
+  Hooks.on("updateActor", (actor, change) => {
+    const ids = app.showsPicker ? undefined : [sys.originalId(app.actor)];
+    if ( sys.transformChanged(actor, change, ids) ) app.render();
+  });
 
   // Combat strip.
   for ( const hook of ["createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant"] ) {

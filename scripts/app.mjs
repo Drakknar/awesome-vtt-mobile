@@ -4,7 +4,7 @@ import sys from "../../awesome-vtt-core/scripts/system.mjs";
 import { CompendiumPanel, JournalPanel } from "../../awesome-vtt-core/scripts/panels.mjs";
 import { DicePanel, advModes, advModeChoices, advModeScale, advModeShort, advModeTone } from "../../awesome-vtt-core/scripts/dice.mjs";
 import * as sheet from "../../awesome-vtt-core/scripts/sheet.mjs";
-import { PromptQueue, askSheetRoll } from "../../awesome-vtt-core/scripts/prompts.mjs";
+import { PromptQueue, askSheetRoll, askItemRoll, sourceRows, toggleSourceIn } from "../../awesome-vtt-core/scripts/prompts.mjs";
 import * as coreUI from "../../awesome-vtt-core/scripts/ui.mjs";
 import * as targets from "./targets.mjs";
 import * as use from "./use.mjs";
@@ -47,7 +47,7 @@ const MODIFIER = /^[+-]?\d{1,2}$/;
 
 /** Actions that submit something or move on; their button is disabled while they run. */
 const BUSY_ACTIONS = new Set([
-  "useItem", "useActivity", "usePrevious", "useNext", "promptChoice", "pickActor", "spellPrepare", "invToParty", "toggleFavorite", "trackAdjust", "turnSpeed",
+  "useItem", "useActivity", "usePrevious", "useNext", "promptChoice", "pickActor", "revertForm", "spellPrepare", "invToParty", "toggleFavorite", "trackAdjust", "turnSpeed",
   "applyHp", "toggleInspiration", "shortRest", "longRest", "deathSave", "endConcentration", "exhaustion",
   "toggleCondition", "toggleEffect", "rollAbility", "rollSave", "rollSkill", "rollInitiative", "endTurn",
   "invQty", "invEquip", "invAttune", "invDetails", "usesAdjust", "slotAdjust", "diceRoll",
@@ -129,12 +129,13 @@ export default class PhoneApp {
   /* -------------------------------------------- */
 
   /**
-   * Characters this user can play (the GM owns, and so sees, every character).
+   * Characters this user can play (the GM owns, and so sees, every character). A transformed form isn't listed: its
+   * character is, and shows the form (see actor). Nor is one a player's revert left behind (core isForm).
    * @returns {Actor[]}
    */
   get ownedCharacters() {
     return game.actors
-      .filter(a => (a.type === "character") && a.isOwner)
+      .filter(a => (a.type === "character") && a.isOwner && !sys.isForm(a))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -147,10 +148,19 @@ export default class PhoneApp {
   }
 
   /**
-   * The chosen character, else the user's assigned character, else their only character.
+   * The chosen character, else the user's assigned character, else their only character; its current form while it
+   * is transformed (the choice keeps the character's id).
    * @returns {Actor|null}
    */
   get actor() {
+    return sys.currentForm(this.#character);
+  }
+
+  /**
+   * The chosen character itself (never a transformed form): the setting, the assigned character, or the only one.
+   * @returns {Actor|null}
+   */
+  get #character() {
     const chosen = game.actors.get(getSetting("actorId"));
     if ( chosen?.isOwner ) return chosen;
     if ( game.user.character?.isOwner ) return game.user.character;
@@ -518,7 +528,7 @@ export default class PhoneApp {
       if ( input ) input.value = amount;
     }
     else if ( kind === "picker" ) {
-      const current = this.actor;
+      const current = this.#character;
       overlay.innerHTML = await renderTemplate(tpl("picker"), {
         characters: this.ownedCharacters.map(a => ({ id: a.id, name: a.name, img: a.img, current: a === current }))
       });
@@ -686,14 +696,18 @@ export default class PhoneApp {
    * SotDL: an attack (weapon, attack spell) asks for its targets (unless the GM turned the list off) and roll
    * options (boons or banes, a modifier), like a dnd5e attack; anything else is used at once with the Next roll.
    * @param {Item} item
-   * @returns {Promise<unknown>}
+   * @returns {Promise<unknown>|undefined}  Nothing when a prompt asks first.
    */
   #startItemUse(item) {
-    if ( !sys.itemNeedsTargets(item) ) return this.#d20(mode => sys.useItem(this.actor, item.id, mode));
+    if ( !sys.itemNeedsTargets(item) ) {
+      // An attack whose boons or banes come from somewhere (SotDL 6.1.14) asks first with "Ask for boons and banes".
+      if ( getSetting("askBoons") && askItemRoll(this.prompts, this.actor, item.id) ) return undefined;
+      return this.#d20(mode => sys.useItem(this.actor, item.id, mode));
+    }
     const steps = targets.targetsEnabled() ? ["targets", "options"] : ["options"];
     this.state.use = {
       itemId: item.id, startItemId: item.id, simple: true, activityId: null, steps, step: steps[0], selected: [],
-      mode: this.state.advMode, bonus: "", base: {}
+      mode: this.state.advMode, bonus: "", base: {}, disabled: new Set()
     };
     return this.#setOverlay("use");
   }
@@ -821,8 +835,21 @@ export default class PhoneApp {
       context.modes = this.#advModes(u.mode);
       context.scale = advModeScale();
       context.bonus = u.bonus;
+      if ( u.simple ) context.sources = this.#useSources();
     }
     return context;
+  }
+
+  /**
+   * SotDL 6.1.14: where the attack's boons and banes come from, against the targets picked in this dialog (none when
+   * the list is off, as the attack then has none); a switched-off one is shown but not counted. Null when there are
+   * none (or an older system).
+   * @returns {object[]|null}
+   */
+  #useSources() {
+    const u = this.state.use;
+    const picked = u.steps.includes("targets") ? targets.tokensFor(u.selected) : [];
+    return sourceRows(sys.boonSources(this.actor, { itemId: u.itemId, targets: picked }), u.disabled);
   }
 
   /**
@@ -951,7 +978,11 @@ export default class PhoneApp {
     const asked = u.steps.includes("targets");
     if ( asked ) targets.setTargets(u.selected);
     u.previewed = false;
-    const options = { targets: asked ? targets.selectedTokens() : [], modifier: parseInt(u.bonus) || 0 };
+    const options = {
+      targets: asked ? targets.selectedTokens() : [],
+      modifier: parseInt(u.bonus) || 0,
+      disabled: [...(u.disabled ?? [])]
+    };
     const { itemId, mode } = u;
     // The "Next roll" choice was used by this attack.
     if ( this.state.advMode !== "normal" ) this.#setAdvMode("normal");
@@ -1076,6 +1107,7 @@ export default class PhoneApp {
         if ( s.overlay === "prompt" ) return this.renderOverlay();
         return;
       case "promptChoice": return this.prompts.choose(target.dataset.index, roll => this.#d20(roll));
+      case "promptSource": return this.prompts.toggleSource(target.dataset.sourceId);
       case "hpMode": return this.#setHpMode(target.dataset.mode);
       case "applyHp": return this.#applyHp();
       case "useItem": return this.#startUse(target.dataset.itemId);
@@ -1083,6 +1115,10 @@ export default class PhoneApp {
       case "useTarget": return this.#toggleUseTarget(target.dataset.tokenId);
       case "usePrevious": return this.#usePrevious();
       case "useMode": if ( s.use ) s.use.mode = target.dataset.mode; return this.renderOverlay();
+      case "useSource":
+        if ( !s.use?.disabled || !target.dataset.sourceId ) return;
+        toggleSourceIn(s.use.disabled, target.dataset.sourceId);
+        return this.renderOverlay();
       case "useNext": return this.#useNext();
       case "useBack": return this.#useBack();
       case "toggleFavorites":

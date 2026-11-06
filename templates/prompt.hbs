@@ -22,6 +22,9 @@
     </div>
     {{#if scale}}{{> avttmAdvScale scale}}{{/if}}
     {{/if}}
+    {{#if sources}}
+    {{> avttmBoonSources action="promptSource"}}
+    {{/if}}
     <div class="avttm-prompt-choices">
       {{#each choices}}
       <button type="button" data-action="promptChoice" data-index="{{@index}}" class="avttm-primary avttm-wide">{{#if icon}}<i class="{{icon}}" inert></i> {{/if}}{{label}}</button>
