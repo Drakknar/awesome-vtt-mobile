@@ -156,7 +156,10 @@ export default class PhoneApp {
     return sys.currentForm(this.#character);
   }
 
-  /** @returns {Actor|null} */
+  /**
+   * The chosen character itself (never a transformed form): the setting, the assigned character, or the only one.
+   * @returns {Actor|null}
+   */
   get #character() {
     const chosen = game.actors.get(getSetting("actorId"));
     if ( chosen?.isOwner ) return chosen;
@@ -693,12 +696,12 @@ export default class PhoneApp {
    * SotDL: an attack (weapon, attack spell) asks for its targets (unless the GM turned the list off) and roll
    * options (boons or banes, a modifier), like a dnd5e attack; anything else is used at once with the Next roll.
    * @param {Item} item
-   * @returns {Promise<unknown>}
+   * @returns {Promise<unknown>|undefined}  Nothing when a prompt asks first.
    */
   #startItemUse(item) {
     if ( !sys.itemNeedsTargets(item) ) {
       // An attack whose boons or banes come from somewhere (SotDL 6.1.14) asks first with "Ask for boons and banes".
-      if ( getSetting("askBoons") && askItemRoll(this.prompts, this.actor, item.id) ) return;
+      if ( getSetting("askBoons") && askItemRoll(this.prompts, this.actor, item.id) ) return undefined;
       return this.#d20(mode => sys.useItem(this.actor, item.id, mode));
     }
     const steps = targets.targetsEnabled() ? ["targets", "options"] : ["options"];
@@ -979,7 +982,9 @@ export default class PhoneApp {
     if ( asked ) targets.setTargets(u.selected);
     u.previewed = false;
     const options = {
-      targets: asked ? targets.selectedTokens() : [], modifier: parseInt(u.bonus) || 0, disabled: [...(u.disabled ?? [])]
+      targets: asked ? targets.selectedTokens() : [],
+      modifier: parseInt(u.bonus) || 0,
+      disabled: [...(u.disabled ?? [])]
     };
     const { itemId, mode } = u;
     // The "Next roll" choice was used by this attack.
