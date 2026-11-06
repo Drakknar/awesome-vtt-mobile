@@ -39,6 +39,8 @@ Hooks.once("init", () => {
   foundry.applications.handlebars.loadTemplates({ avttmSpellTags: `modules/${MODULE_ID}/templates/spell-tags.hbs` });
   // SotDL's "Banes … Boons" line under the Next roll choice ({{> avttmAdvScale}}): Dice view, prompts, attack options.
   foundry.applications.handlebars.loadTemplates({ avttmAdvScale: `modules/${MODULE_ID}/templates/adv-scale.hbs` });
+  // SotDL 6.1.14's boon and bane sources ({{> avttmBoonSources action=…}}): prompts and the use dialog.
+  foundry.applications.handlebars.loadTemplates({ avttmBoonSources: `modules/${MODULE_ID}/templates/boon-sources.hbs` });
   // Hide Foundry's desktop interface as early as possible on a phone.
   if ( isPhoneMode() ) {
     document.body.classList.add("avttm-phone");

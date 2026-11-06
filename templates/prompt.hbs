@@ -23,16 +23,7 @@
     {{#if scale}}{{> avttmAdvScale scale}}{{/if}}
     {{/if}}
     {{#if sources}}
-    <fieldset class="avttm-boon-sources">
-      <legend>{{localize "AVTTC.Boons.sources"}}</legend>
-      {{#each sources}}
-      <button type="button" data-action="promptSource" data-source-id="{{id}}" role="checkbox"
-              aria-checked="{{#if enabled}}true{{else}}false{{/if}}" class="avttm-wide {{#if enabled}}selected{{/if}}"
-              aria-label="{{localize 'AVTTC.Boons.sourceToggle'}}: {{value}} {{label}}">
-        <i class="fa-regular {{#if enabled}}fa-square-check{{else}}fa-square{{/if}}" inert></i> <b>{{value}}</b> {{label}}
-      </button>
-      {{/each}}
-    </fieldset>
+    {{> avttmBoonSources action="promptSource"}}
     {{/if}}
     <div class="avttm-prompt-choices">
       {{#each choices}}

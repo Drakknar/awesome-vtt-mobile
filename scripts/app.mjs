@@ -4,7 +4,7 @@ import sys from "../../awesome-vtt-core/scripts/system.mjs";
 import { CompendiumPanel, JournalPanel } from "../../awesome-vtt-core/scripts/panels.mjs";
 import { DicePanel, advModes, advModeChoices, advModeScale, advModeShort, advModeTone } from "../../awesome-vtt-core/scripts/dice.mjs";
 import * as sheet from "../../awesome-vtt-core/scripts/sheet.mjs";
-import { PromptQueue, askSheetRoll, askItemRoll } from "../../awesome-vtt-core/scripts/prompts.mjs";
+import { PromptQueue, askSheetRoll, askItemRoll, sourceRows, toggleSourceIn } from "../../awesome-vtt-core/scripts/prompts.mjs";
 import * as coreUI from "../../awesome-vtt-core/scripts/ui.mjs";
 import * as targets from "./targets.mjs";
 import * as use from "./use.mjs";
@@ -849,10 +849,7 @@ export default class PhoneApp {
   #useSources() {
     const u = this.state.use;
     const picked = u.steps.includes("targets") ? targets.tokensFor(u.selected) : [];
-    const list = sys.boonSources(this.actor, { itemId: u.itemId, targets: picked }) ?? [];
-    return list.length ? list.map(({ id, label, value }) => ({
-      id, label, value: (value > 0) ? `+${value}` : `−${-value}`, enabled: !u.disabled?.has(id)
-    })) : null;
+    return sourceRows(sys.boonSources(this.actor, { itemId: u.itemId, targets: picked }), u.disabled);
   }
 
   /**
@@ -1118,12 +1115,10 @@ export default class PhoneApp {
       case "useTarget": return this.#toggleUseTarget(target.dataset.tokenId);
       case "usePrevious": return this.#usePrevious();
       case "useMode": if ( s.use ) s.use.mode = target.dataset.mode; return this.renderOverlay();
-      case "useSource": {
-        const id = target.dataset.sourceId;
-        if ( !s.use?.disabled || !id ) return;
-        if ( !s.use.disabled.delete(id) ) s.use.disabled.add(id);
+      case "useSource":
+        if ( !s.use?.disabled || !target.dataset.sourceId ) return;
+        toggleSourceIn(s.use.disabled, target.dataset.sourceId);
         return this.renderOverlay();
-      }
       case "useNext": return this.#useNext();
       case "useBack": return this.#useBack();
       case "toggleFavorites":
