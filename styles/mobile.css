@@ -154,6 +154,10 @@ body.avttm-phone #ui-right { display: none !important; }
 .avttm-prompt p { margin: 0; }
 .avttm-prompt .avttm-launcher-panel > * + * { border-top: none; padding-top: 0; }
 .avttm-prompt-choices { display: flex; flex-direction: column; gap: 0.4em; }
+/* SotDL 6.1.14: where the roll's boons and banes come from; a switched-off one is dimmed and struck through. */
+.avttm-boon-sources { display: flex; flex-direction: column; gap: 0.3em; margin: 0; padding: 0.4em 0.6em; border-radius: 8px; }
+#avttm-app .avttm-boon-sources button { justify-content: flex-start; text-align: start; min-height: 44px; height: auto; white-space: normal; }
+#avttm-app .avttm-boon-sources button:not(.selected) { opacity: 0.55; text-decoration: line-through; }
 .avttm-prompt-deathSave { border-top-color: var(--avttm-danger); }
 .avttm-prompt-deathSave header h3 { color: var(--avttm-danger); }
 .avttm-death-tally { display: flex; flex-direction: column; gap: 0.3em; }

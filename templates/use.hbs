@@ -114,6 +114,19 @@
   {{/if}}
   {{/if}}
   {{#if simple}}
+  {{!-- SotDL 6.1.14: where the attack's boons and banes come from; tap one to leave it out. --}}
+  {{#if sources}}
+  <fieldset class="avttm-boon-sources">
+    <legend>{{localize "AVTTC.Boons.sources"}}</legend>
+    {{#each sources}}
+    <button type="button" data-action="useSource" data-source-id="{{id}}" role="checkbox"
+            aria-checked="{{#if enabled}}true{{else}}false{{/if}}" class="avttm-wide {{#if enabled}}selected{{/if}}"
+            aria-label="{{localize 'AVTTC.Boons.sourceToggle'}}: {{value}} {{label}}">
+      <i class="fa-regular {{#if enabled}}fa-square-check{{else}}fa-square{{/if}}" inert></i> <b>{{value}}</b> {{label}}
+    </button>
+    {{/each}}
+  </fieldset>
+  {{/if}}
   {{!-- SotDL: a whole-number modifier (boons and banes are the choice above). --}}
   <label class="avttm-use-field"><span>{{localize "AVTTM.Use.Modifier"}}</span>
     <input type="text" name="useBonus" value="{{bonus}}" maxlength="3" inputmode="text" autocomplete="off"

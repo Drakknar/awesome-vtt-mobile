@@ -222,7 +222,18 @@ export function restoreTargets() {
 export function selectedTokens() {
   const scene = targetScene();
   if ( !scene || (scene.id !== sceneId) ) return [];
-  return [...selected].map(id => scene.tokens.get(id)).filter(t => t && !t.hidden);
+  return tokensFor([...selected]);
+}
+
+/**
+ * Token documents for token ids on the target scene (e.g. picked in the use dialog, before they are targeted), the
+ * ones that still exist and are visible.
+ * @param {string[]} ids
+ * @returns {TokenDocument[]}
+ */
+export function tokensFor(ids) {
+  const scene = targetScene();
+  return scene ? ids.map(id => scene.tokens.get(id)).filter(t => t && !t.hidden) : [];
 }
 
 /**

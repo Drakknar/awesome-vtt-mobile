@@ -110,6 +110,8 @@ function registerAppHooks() {
   Hooks.on("updateUser", user => user.isSelf && app.render());
   Hooks.on("createActor", () => app.render());
   Hooks.on("deleteActor", () => app.render());
+  // A transformed form reverted by a player keeps existing without its flags (only a GM deletes it).
+  Hooks.on("updateActor", (actor, change) => foundry.utils.hasProperty(change, `flags.${game.system.id}`) && app.render());
 
   // Combat strip.
   for ( const hook of ["createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant"] ) {

@@ -12,6 +12,8 @@ The phone also runs in **Shadow of the Demon Lord** worlds (system `demonlord` 6
 
 Also:
 - **Targets:** tapping a weapon or an attack spell opens the use dialog: pick the targets (shown on the table's map as you tap), then boons / banes and a whole-number modifier. One attack per weapon or spell target; talents and gear that attack also ask, and use the first target. On a chat card, **Roll damage**, **Apply damage**, healing and effect buttons (and the notice's Roll damage button) first ask who they are for, with your last targets already chosen.
+- **Where boons and banes come from** (system 6.1.14 or later): the attack's use dialog, attribute prompts and GM challenge requests list the roll's own boons and banes (effects, the item, the target's defenses, a horrifying target; what the system hides from players shows as "Other"). Tap one to leave it out of the roll, as in the system's own roll dialog. With **Ask for boons and banes** on, an attack that doesn't open the use dialog asks first in the same way when it has such boons or banes.
+- **Transformed characters** (system 6.1.13 or later, when the GM allows transformations; dnd5e's polymorph and wild shape too): the phone follows the character into its new form and back when it reverts; the character list shows the character, not the form. Quick actions show **Revert to original form** while transformed.
 - **Damage after attacks** (setting "Roll damage with attacks"), **prompts** (GM challenge requests; Fast / Slow at the start of an encounter), **favorites** (stars; tap the portrait for the row; only weapons, talents, spells and gear that does something when used, so not a candle) and the **Party** tab (Shared Inventory module, a Party actor the GM creates or chooses).
 
 ## Setup
