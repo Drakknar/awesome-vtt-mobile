@@ -150,6 +150,7 @@ These parts are based on the Foundry 14.368 and dnd5e 6.0.5 source but have not 
   - the browser-version error, which can misread a phone browser (it reported "Safari 12.0" in testing). If the browser really is out of date, some features may not work; Foundry still logs the message in the browser console.
 
   Other notifications are left alone.
+- **Unlinked tokens transformed in place:** transforming a token that isn't linked to its actor changes only that token. The map shows the form, but the phone keeps showing the character and offers no Revert. Player characters' tokens are normally linked.
 
 ## Structure
 
