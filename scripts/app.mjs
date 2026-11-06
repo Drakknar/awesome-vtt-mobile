@@ -130,12 +130,12 @@ export default class PhoneApp {
 
   /**
    * Characters this user can play (the GM owns, and so sees, every character). A transformed form isn't listed: its
-   * character is, and shows the form (see actor).
+   * character is, and shows the form (see actor). Nor is one a player's revert left behind (core isForm).
    * @returns {Actor[]}
    */
   get ownedCharacters() {
     return game.actors
-      .filter(a => (a.type === "character") && a.isOwner && !sys.isTransformed(a))
+      .filter(a => (a.type === "character") && a.isOwner && !sys.isForm(a))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
