@@ -1,5 +1,6 @@
 import { MODULE_ID } from "./constants.mjs";
 import * as sys from "../../awesome-vtt-core/scripts/dnd5e.mjs";
+import { activityIsLike } from "../../awesome-vtt-core/scripts/common.mjs";
 
 /**
  * Using an item's activity from the phone (dnd5e 6.x), in up to four steps:
@@ -15,7 +16,7 @@ import * as sys from "../../awesome-vtt-core/scripts/dnd5e.mjs";
  * while the map is off. Only activity types the step doesn't cover (e.g. bastion orders) keep dnd5e's own dialog.
  */
 
-/** Activity types that roll straight after use (dnd5e's _triggerSubsequentActions). */
+/** Activity types that roll straight after use (dnd5e's _triggerSubsequentActions), or are "like" one of them. */
 const ROLLS_ON_USE = { attack: "attack", damage: "damage", heal: "damage" };
 
 const PENDING_MS = 2 * 60 * 1000;
@@ -54,7 +55,7 @@ export function targetCount(activity) {
  * @returns {boolean}
  */
 export const prefersAllies = activity =>
-  (activity.type === "heal") || ["ally", "willing"].includes(activity.target?.affects?.type);
+  activityIsLike(activity, "heal") || ["ally", "willing"].includes(activity.target?.affects?.type);
 
 /**
  * Roll options offered before use, or null when the activity doesn't roll straight away.
@@ -62,7 +63,7 @@ export const prefersAllies = activity =>
  * @returns {{kind: "attack"|"damage", attackModes?: object[], ammunition?: object[], mastery?: object[]}|null}
  */
 export function rollOptions(activity) {
-  const kind = ROLLS_ON_USE[activity.type];
+  const kind = Object.entries(ROLLS_ON_USE).find(([type]) => activityIsLike(activity, type))?.[1];
   if ( !kind ) return null;
   if ( kind === "damage" ) return { kind };
   const sys = activity.item.system;

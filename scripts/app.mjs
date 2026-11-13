@@ -680,6 +680,8 @@ export default class PhoneApp {
     if ( !item ) return;
     // Systems without dnd5e's activities (SotDL): targets and roll options for an attack, otherwise straight away.
     if ( !sys.FEATURES.useSteps ) return this.#startItemUse(item);
+    // dnd5e hides every activity (antimagic, unattuned, …): Item#use would only post the item's card.
+    if ( sys.useBlocked(item) ) return ui.notifications.warn(game.i18n.format("AVTTM.Use.NotUsable", { name: item.name }));
     const activities = use.usableActivities(item);
     if ( !activities.length ) return sys.useItem(actor, itemId);
     this.state.use = {
@@ -773,7 +775,10 @@ export default class PhoneApp {
       last: index === (u.steps.length - 1)
     };
     if ( u.step === "activity" ) {
-      context.activities = activities.map(a => ({ id: a.id, name: a.name, img: a.img }));
+      // Limited uses, as dnd5e's own activity choice shows them (6.1).
+      context.activities = activities.map(a => ({
+        id: a.id, name: a.name, img: a.img, uses: a.uses?.max ? { value: a.uses.value, max: a.uses.max } : null
+      }));
     }
     else if ( u.step === "targets" ) {
       const count = activity ? use.targetCount(activity) : null;
