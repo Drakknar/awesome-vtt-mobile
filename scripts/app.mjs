@@ -680,7 +680,7 @@ export default class PhoneApp {
     if ( !item ) return;
     // Systems without dnd5e's activities (SotDL): targets and roll options for an attack, otherwise straight away.
     if ( !sys.FEATURES.useSteps ) return this.#startItemUse(item);
-    // dnd5e hides every activity (antimagic, unattuned, …): Item#use would only post the item's card.
+    // When dnd5e hides every activity (antimagic, unattuned, …): Item#use would only post the item's card.
     if ( sys.useBlocked(item) ) return ui.notifications.warn(game.i18n.format("AVTTM.Use.NotUsable", { name: item.name }));
     const activities = use.usableActivities(item);
     if ( !activities.length ) return sys.useItem(actor, itemId);
