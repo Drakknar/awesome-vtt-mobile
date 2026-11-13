@@ -74,7 +74,7 @@ All options appear in the phone's Settings tab and in Foundry's settings window.
 
 Tapping something to use (a weapon, spell, feature or consumable) asks only what that use needs, in up to four steps. Steps that don't apply are skipped, so a simple feature is still used with one tap.
 
-1. **Choose the action:** only when the item has more than one (for example, a weapon's attack and a special ability).
+1. **Choose the action:** only when the item has more than one (for example, a weapon's attack and a special ability). Actions with limited uses show how many are left. Actions dnd5e hides (an antimagic area, an unattuned or unidentified magic item) aren't offered; if nothing is left, the phone says so instead of posting the item's card.
 2. **Casting:** only when dnd5e would otherwise open its usage window. It asks the same questions:
    - **Cast at level** with the slots left, and **Use a spell slot**. For a spell cast from an item (a wand or scroll, say), it offers the levels that item allows.
    - **Use at**, for features that can be used for more effect.

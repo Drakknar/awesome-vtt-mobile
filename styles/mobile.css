@@ -320,6 +320,7 @@ body.avttm-phone #ui-right { display: none !important; }
 .avttm-list button { width: 100%; display: flex; gap: 0.7em; align-items: center; text-align: left; }
 .avttm-list img { width: 2.4em; height: 2.4em; border-radius: 50%; object-fit: cover; border: none; flex: none; }
 .avttm-list span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avttm-list .avttm-use-uses { flex: none; }
 .avttm-button-row { display: flex; gap: 0.5em; flex-wrap: wrap; }
 .avttm-button-row > button { flex: 1; }
 .avttm-button-column { display: flex; flex-direction: column; gap: 0.5em; }

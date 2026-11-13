@@ -296,6 +296,7 @@
       "Bonus": "Situational bonus",
       "BonusPlaceholder": "e.g. 2 or 1d4 (optional)",
       "BadBonus": "The situational bonus isn't a valid roll formula.",
+      "NotUsable": "{name} can't be used right now, e.g. inside an antimagic area, or while unattuned or unidentified.",
       "CastAt": "Cast at level",
       "ConsumeSlot": "Use a spell slot",
       "Concentrate": "Concentrate on it",

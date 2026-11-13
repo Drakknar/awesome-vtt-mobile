@@ -14,7 +14,7 @@
   {{#if (eq step "activity")}}
   <ul class="avttm-list">
     {{#each activities}}
-    <li><button type="button" data-action="useActivity" data-activity-id="{{id}}">{{#if img}}<img src="{{img}}" alt="">{{/if}}<span>{{name}}</span></button></li>
+    <li><button type="button" data-action="useActivity" data-activity-id="{{id}}">{{#if img}}<img src="{{img}}" alt="">{{/if}}<span>{{name}}</span>{{#if uses}}<span class="avttm-use-uses avttm-muted avttm-small">{{uses.value}}/{{uses.max}}</span>{{/if}}</button></li>
     {{/each}}
   </ul>
   {{/if}}
